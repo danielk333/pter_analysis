@@ -22,6 +22,7 @@ setuptools.setup(
     ],
     install_requires=pip_req,
     packages=setuptools.find_packages(),
+    entry_points={'console_scripts': ['apter=pter_analysis.main:cli']},
     # metadata to display on PyPI
     author='Daniel Kastinen',
     author_email='daniel.kastinen@irf.se',
