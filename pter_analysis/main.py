@@ -61,6 +61,39 @@ def cli():
 @click.option('--config', default=CONFIGFILE, help='Path to config file')
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
 @click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
+def accuracy(config, default_estimate, todotxt, search):
+    '''Checks the prediction accuracy for the searches
+
+    SEARCH: Pter-type search strings (multiple searches are given by space separation)
+    '''
+
+    cfg, todo = prepare(todotxt, config)
+    errors = []
+    for sch in search:
+        tasks = apply_serach(cfg, todo, sch)
+        error = analysis.calculate_error(tasks, default_estimate=default_estimate)
+        errors += [error]
+
+    fig, ax = plt.subplots()
+    ax.set_title('Execution time estimate errors')
+    ax.boxplot(errors)
+    ax.set_xticklabels(search, rotation=45)
+    ax.set_ylabel('Overestimate $\\leftarrow$ [h] $\\rightarrow$ Underestimate')
+    
+    pos = ax.get_position()
+    pos.y0 += 0.24
+    ax.set_position(pos)
+
+    plt.show()
+
+
+
+
+@cli.command()
+@click.argument('SEARCH', nargs=-1)
+@click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
 def burndown(config, default_estimate, todotxt, search):
     '''Creates a burn-down chart for the selection.
 

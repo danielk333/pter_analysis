@@ -88,46 +88,38 @@ def calculate_total_activity(tasks, h_per_day, default_estimate=0):
 
 
 
-def calculate_error(tasks, split_project=True):
+def calculate_error(tasks, default_estimate=0):
 
     def _ok_task(task):
         ok = True
         if not task.is_completed:
             ok = False
-        if 'spent' not in task.attributes:
+        if 'estimate' not in task.attributes and default_estimate == 0:
             ok = False
-        if 'estimate' not in task.attributes:
+        if 'spent' not in task.attributes:
             ok = False
         return ok
 
     categories = {}
 
-    for task in tasks:
-        if not _ok_task(task):
-            continue
+    ok_tasks = [task for task in tasks if _ok_task(task)]
 
-        for project in task.projects:
-            if project not in categories:
-                categories[project] = [task]
-            else:
-                categories[project] += [task]
-
-    labels = categories.keys()
-    errors = []
-
-    for key in labels:
-        tmp_err = np.zeros((len(categories[key]),))
-        for ti,task in enumerate(categories[key]):
-            try:
+    error = np.zeros((len(ok_tasks),))
+    for ti, task in enumerate(ok_tasks):
+        try:
+            if 'estimate' in task.attributes:
                 td_est = parse_duration(task.attributes['estimate'][0])
                 est = td_est.seconds/3600.0
-                td_meas = parse_duration(task.attributes['spent'][0])
-                meas = td_meas.seconds/3600.0
-                tmp_err[ti] = meas - est
-            except:
-                tmp_err[ti] = np.nan
-            
-        tmp_err = tmp_err[np.logical_not(np.isnan(tmp_err))]
-        errors.append(tmp_err)
+            else:
+                est = default_estimate
 
-    return labels, errors
+            td_meas = parse_duration(task.attributes['spent'][0])
+            meas = td_meas.seconds/3600.0
+            error[ti] = meas - est
+        except:
+            error[ti] = np.nan
+        
+    error = error[np.logical_not(np.isnan(error))]
+
+
+    return error
