@@ -1,0 +1,1001 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"tx",
+				"txps"
+			],
+			[
+				"spa",
+				"space_objects"
+			],
+			[
+				"stat",
+				"station_id"
+			],
+			[
+				"Sig",
+				"Sigma_p_inv"
+			],
+			[
+				"fla",
+				"flat_passes"
+			],
+			[
+				"rx",
+				"rx_passes"
+			],
+			[
+				"var",
+				"var"
+			],
+			[
+				"enu",
+				"enu_ind"
+			],
+			[
+				"space",
+				"space_object"
+			],
+			[
+				"Sgi",
+				"Sigma_orb"
+			],
+			[
+				"Ass",
+				"assertRaises"
+			],
+			[
+				"Upd",
+				"UPDATE_KW"
+			],
+			[
+				"para",
+				"Parameters"
+			],
+			[
+				"param",
+				"parameters"
+			],
+			[
+				"assert",
+				"assert_almost_equal"
+			],
+			[
+				"Time",
+				"TimeDelta"
+			],
+			[
+				"gen",
+				"gen_mock"
+			],
+			[
+				"pr",
+				"propagate"
+			],
+			[
+				"pro",
+				"propagator"
+			],
+			[
+				"orb",
+				"orb_init"
+			],
+			[
+				"or",
+				"Orbit"
+			],
+			[
+				"state",
+				"state0"
+			],
+			[
+				"sv",
+				"svec"
+			],
+			[
+				"ass",
+				"assert_array_less"
+			],
+			[
+				"st",
+				"state0"
+			],
+			[
+				"SP",
+				"SpaceObject"
+			],
+			[
+				"pbar",
+				"pbars"
+			],
+			[
+				"seg",
+				"segment"
+			],
+			[
+				"tdm",
+				"tdm_xsd"
+			],
+			[
+				"for",
+				"force_"
+			],
+			[
+				"Isotrop",
+				"VariableIsotropicDrag"
+			],
+			[
+				"dra",
+				"drag_driver"
+			],
+			[
+				"__",
+				"__heartbeat"
+			],
+			[
+				"mc",
+				"mc_obj"
+			],
+			[
+				"in",
+				"ionospheric_ray_trace"
+			],
+			[
+				"best_",
+				"best_matches"
+			],
+			[
+				"best",
+				"best_matches"
+			],
+			[
+				"n",
+				"n_closest"
+			],
+			[
+				"math",
+				"match_metric"
+			],
+			[
+				"prop",
+				"property\tNew Property"
+			],
+			[
+				"resid",
+				"residual_distribution_metric"
+			],
+			[
+				"eis",
+				"eiscat_uhf"
+			],
+			[
+				"all",
+				"all_targets"
+			],
+			[
+				"max_",
+				"max_samp"
+			],
+			[
+				"obj",
+				"objects"
+			],
+			[
+				"k",
+				"k_norm"
+			],
+			[
+				"prof",
+				"profiler"
+			],
+			[
+				"edn",
+				"t_end"
+			],
+			[
+				"txp",
+				"txrxp"
+			],
+			[
+				"pass",
+				"passes"
+			],
+			[
+				"obs",
+				"obs_kw"
+			],
+			[
+				"out",
+				"out_frame"
+			],
+			[
+				"oreki",
+				"orekit_in_frame"
+			],
+			[
+				"ra",
+				"raise"
+			],
+			[
+				"link",
+				"linkfiles"
+			],
+			[
+				"SN",
+				"SNRdB"
+			],
+			[
+				"sn",
+				"SNRdB"
+			],
+			[
+				"diam",
+				"diameter"
+			],
+			[
+				"axi",
+				"axis_labels"
+			],
+			[
+				"sc",
+				"scale"
+			],
+			[
+				"epo",
+				"epoch_field"
+			],
+			[
+				"Para",
+				"parameters"
+			],
+			[
+				"def",
+				"default_parameters"
+			],
+			[
+				"por",
+				"propagate"
+			],
+			[
+				"sgp",
+				"SGP4"
+			],
+			[
+				"lin",
+				"line2"
+			],
+			[
+				"l",
+				"line1"
+			],
+			[
+				"print",
+				"print_args"
+			],
+			[
+				"kw",
+				"kwargs"
+			],
+			[
+				"el",
+				"ellipsoid"
+			],
+			[
+				"earth",
+				"earth_gravity"
+			],
+			[
+				"mean",
+				"mean_elements"
+			],
+			[
+				"jd",
+				"jd_f"
+			],
+			[
+				"err",
+				"errors"
+			],
+			[
+				"eo",
+				"epoch0"
+			],
+			[
+				"time",
+				"time_scale"
+			],
+			[
+				"grav",
+				"grav_model"
+			],
+			[
+				"gravi",
+				"gravity_model"
+			],
+			[
+				"ast",
+				"astropy_state"
+			],
+			[
+				"snap",
+				"snapshot_total"
+			],
+			[
+				"dete",
+				"detected_objects"
+			],
+			[
+				"freq",
+				"frequency"
+			],
+			[
+				"max",
+				"max_snr"
+			],
+			[
+				"thr",
+				"thr_id"
+			],
+			[
+				"cache",
+				"caches"
+			],
+			[
+				"ca",
+				"caches"
+			],
+			[
+				"inde",
+				"index__"
+			],
+			[
+				"_t",
+				"_total"
+			],
+			[
+				"pop",
+				"population"
+			],
+			[
+				"po",
+				"point_tx"
+			],
+			[
+				"az",
+				"azimuth"
+			],
+			[
+				"e",
+				"elevation"
+			],
+			[
+				"mpi",
+				"mpi_inds"
+			],
+			[
+				"iter",
+				"iterable"
+			],
+			[
+				"MPI",
+				"MPI_only"
+			],
+			[
+				"simulation",
+				"simulation_step"
+			],
+			[
+				"sub",
+				"subvars"
+			],
+			[
+				"get",
+				"getattr"
+			],
+			[
+				"proc",
+				"process_id"
+			],
+			[
+				"cach",
+				"cache"
+			],
+			[
+				"attr",
+				"attribute"
+			],
+			[
+				"log",
+				"logger"
+			],
+			[
+				"path",
+				"paths"
+			],
+			[
+				"mas",
+				"master_th_func"
+			],
+			[
+				"mp",
+				"mpi_wrap_master_thread"
+			],
+			[
+				"x_",
+				"x_size"
+			],
+			[
+				"plot",
+				"plot_scan"
+			],
+			[
+				"cy",
+				"cycle_num"
+			],
+			[
+				"ex",
+				"exec_times"
+			],
+			[
+				"int",
+				"int64"
+			],
+			[
+				"ret",
+				"return_copy"
+			],
+			[
+				"Pr",
+				"Prop_opts"
+			],
+			[
+				"mast",
+				"master_base"
+			],
+			[
+				"my_",
+				"my_snrs"
+			],
+			[
+				"cah",
+				"cache"
+			],
+			[
+				"va",
+				"VARIABLES"
+			],
+			[
+				"scan",
+				"scan_sched"
+			],
+			[
+				"to",
+				"totals"
+			],
+			[
+				"gr",
+				"gr_pass"
+			],
+			[
+				"ps",
+				"pslst"
+			],
+			[
+				"pri",
+				"priority"
+			],
+			[
+				"propa",
+				"propagate"
+			],
+			[
+				"sch",
+				"scheduler"
+			],
+			[
+				"control",
+				"controllers"
+			],
+			[
+				"ecef",
+				"ecefs"
+			],
+			[
+				"dia",
+				"diameter"
+			],
+			[
+				"pas",
+				"pass_data"
+			],
+			[
+				"ze",
+				"zenith1_ang"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "setup.py",
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "README.rst",
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pter_analysis/__init__.py",
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"pac",
+				"Package Control: Install Package"
+			],
+			[
+				"lint",
+				"SublimeLinter: Show All Errors"
+			],
+			[
+				"linter",
+				"Preferences: SublimeLinter Settings"
+			],
+			[
+				"sublime lin",
+				"Preferences: SublimeLinter Settings"
+			],
+			[
+				"GIT ST",
+				"Git: Status"
+			],
+			[
+				"package",
+				"Package Control: Install Package"
+			],
+			[
+				"theme",
+				"UI: Select Color Scheme"
+			],
+			[
+				"boxy",
+				"Boxy Theme: Preferences"
+			],
+			[
+				"high",
+				"SublimeLinter: Toggle Highlights"
+			],
+			[
+				"the",
+				"UI: Select Theme"
+			],
+			[
+				"Package Control: install",
+				"Package Control: Install Package"
+			],
+			[
+				"settings",
+				"Preferences: Settings"
+			],
+			[
+				"Box",
+				"Boxy Theme: Preferences"
+			],
+			[
+				"preferences subl",
+				"Preferences: SublimeLinter Settings"
+			],
+			[
+				"install ",
+				"Package Control: Install Package"
+			],
+			[
+				"Pack",
+				"Install Package Control"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 157.0,
+		"history":
+		[
+			"a",
+			"a = dict()",
+			"print('hej')",
+			"ls"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/danielk/IRF/IRF_GITLAB/pter-analysis"
+	],
+	"file_history":
+	[
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/getting_started.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/linearized_coded.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/tracking_scheduler.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/correlator_example.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/e3d_demo_planner.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/scheduler/tracking.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/scheduler/scheduler.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/scheduler/static_list.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/scans/bp.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/scans/scan.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/controller/scanner.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/controller/static.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/controller/tracker.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/linearized_orbit_determination.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/estimating_orbit_errors.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/orbit_error_evolution.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/frames.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/docsrc/Makefile",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/setup.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/version.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/space_object.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/correlator.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/dates.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/interpolation.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/__init__.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/__init__.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/controller/__init__.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/io/__init__.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/plotting/general.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/plotting/radar.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/plotting/scan.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/plotting/tracking.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/scheduler/observed_parameters.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/population/master.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/tx_rx.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/radar.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/scheduler/__init__.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/propagator/__init__.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/scans/__init__.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/__init__.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/instances/__init__.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/radar_passes.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/passes.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/simulation.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_space_object.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/measurment_linear_errors.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/plotting/__init__.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/sgp4_fit.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/propagator/base.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/population/tles.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_correlator.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/population/population.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_propagator_base.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/keplerian_propagator.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/propagator/kepler.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/propagator/orekit.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/propagator/pysgp4.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_controllers.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_scanning_tracking.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_propagator_sgp4.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_propagator_orekit.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/instances/mock.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_scan.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/scans/random_uniform.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_radar_controller.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/controller/radar_controller.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_population.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_frames.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_frame_basic.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_population_library.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/docsrc/source/index.rst",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/anom_diffusion_drag_directly.py",
+		"/home/danielk/IRF/ESA_E3D/SORTS/tsdr_fence.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/raytrace_with_pyglow.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/io/ccsds.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/atmospheric_drag_variation.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/ionospheric_ray_trace.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/atmospheric_drag.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/simulation_helper_tracking.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/alternative_scan_controller.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/instances/eiscat_uhf.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/instances/tsdr.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/sgp4_heartbeat.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/orekit_heartbeat.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/anom_diffusion_drag_heartbeat.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/README.rst",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/using_pyglow.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/spacetrack_catalog.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/adding_random_errors.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/observing_passes.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/install_orekit.sh",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/Makefile",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/orekit_propagator.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/space_object.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/logger_orekit.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/orekit_small_step.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/profiler_orekit.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/instances/eiscat_3d.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/eiscat3d_demonstrator_array.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/interpolate_radar_beams__ngl.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/predefined_eiscat3d.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/interpolating_states.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/simulate_scanning.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/static_radar_controller_speedup.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/using_frames.py",
+		"/home/danielk/IRF/E3D_PA/sorts_v4_tests/test_mpi_exit.py",
+		"/home/danielk/IRF/PYTHON/warppers_stuff.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/using_astropy.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/profiling.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/simulation_helper_scanning.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/populations.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/constants.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/master_population__ngl.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/population/__init__.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/tle_propagation_with_sorts.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/requirements",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/tracker_controller.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/sgp4_package_example.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/sgp4_propagator.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/teme_coordinates.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/signals.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/predefined_scans.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/tests/test_coord.py",
+		"/home/danielk/IRF/ESA_E3D/SORTS/plot_beams.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/memory_profiler.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/examples/TSDR_beampark.py",
+		"/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/radar/scans/fence.py"
+	],
+	"find":
+	{
+		"height": 27.0
+	},
+	"find_in_files":
+	{
+		"height": 130.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "setup.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "README.rst",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/RestructuredText/reStructuredText.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "pter_analysis/__init__.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 27.0
+	},
+	"input":
+	{
+		"height": 43.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.SublimeLinter":
+	{
+		"height": 263.0
+	},
+	"output.exec":
+	{
+		"height": 124.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "pter_analysis.sublime-project",
+	"replace":
+	{
+		"height": 50.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"~/IRF/IRF_GITLAB/dasst/dasst/distributions/scipy_distribution.py"
+			],
+			[
+				"dist",
+				"~/IRF/IRF_GITLAB/dasst/doc/source/distributions.rst"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 103.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 574.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 204.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
