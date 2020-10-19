@@ -8,7 +8,7 @@ import numpy as np
 #Pter and pytodotxt
 from pter.utils import parse_duration
 
-def calculate_total_activity(tasks, h_per_day):
+def calculate_total_activity(tasks, h_per_day, default_estimate=0):
 
     def _ok_task(task):
         ok = True
@@ -18,8 +18,6 @@ def calculate_total_activity(tasks, h_per_day):
             ok = False
         if 'due' not in task.attributes:
             ok = False
-        if 'estimate' not in task.attributes:
-            ok = False
         return ok
 
     start = []
@@ -28,14 +26,26 @@ def calculate_total_activity(tasks, h_per_day):
     for task in tasks:
         if not _ok_task(task):
             continue
+
+        if 'estimate' in task.attributes:
+            td = parse_duration(task.attributes['estimate'][0])
+            duration.append(td.seconds/3600.0)
+        else:
+            if default_estimate == 0:
+                continue
+            else:
+                duration.append(default_estimate)
+
         start.append(task.creation_date)
         due = task.attributes['due'][0].strip()
         due = due.replace(',','')
+        due = datetime.date.fromisoformat(due)
 
-        end.append(datetime.date.fromisoformat(due))
+        if due < datetime.date.today():
+            due = datetime.date.today() + datetime.timedelta(days=1)
 
-        td = parse_duration(task.attributes['estimate'][0])
-        duration.append(td.seconds/3600.0)
+        end.append(due)
+
 
     duration = np.array(duration) 
     start = np.array(start)
@@ -75,3 +85,49 @@ def calculate_total_activity(tasks, h_per_day):
 
 
     return dates, total_activity, start, end
+
+
+
+def calculate_error(tasks, split_project=True):
+
+    def _ok_task(task):
+        ok = True
+        if not task.is_completed:
+            ok = False
+        if 'spent' not in task.attributes:
+            ok = False
+        if 'estimate' not in task.attributes:
+            ok = False
+        return ok
+
+    categories = {}
+
+    for task in tasks:
+        if not _ok_task(task):
+            continue
+
+        for project in task.projects:
+            if project not in categories:
+                categories[project] = [task]
+            else:
+                categories[project] += [task]
+
+    labels = categories.keys()
+    errors = []
+
+    for key in labels:
+        tmp_err = np.zeros((len(categories[key]),))
+        for ti,task in enumerate(categories[key]):
+            try:
+                td_est = parse_duration(task.attributes['estimate'][0])
+                est = td_est.seconds/3600.0
+                td_meas = parse_duration(task.attributes['spent'][0])
+                meas = td_meas.seconds/3600.0
+                tmp_err[ti] = meas - est
+            except:
+                tmp_err[ti] = np.nan
+            
+        tmp_err = tmp_err[np.logical_not(np.isnan(tmp_err))]
+        errors.append(tmp_err)
+
+    return labels, errors
