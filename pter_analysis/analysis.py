@@ -87,6 +87,47 @@ def calculate_total_activity(tasks, h_per_day, default_estimate=0):
     return dates, total_activity, start, end
 
 
+def distribute_projects(todo, default_estimate=0):
+
+    task_distribution = dict()
+    for task in todo.tasks:
+        for project in task.projects:
+            if project not in task_distribution:
+                task_distribution[project] = [task]
+            else:
+                task_distribution[project] += [task]
+
+    spent_distribution = {key:0 for key in task_distribution}
+    estimate_distribution = {key:0 for key in task_distribution}
+    num_distribution = {key:0 for key in task_distribution}
+    for key, tasks in task_distribution.items():
+        for task in tasks:
+            if not task.is_completed:
+                num_distribution[key] += 1
+
+            try:
+                if 'estimate' in task.attributes and not task.is_completed:
+                    td_est = parse_duration(task.attributes['estimate'][0])
+                    estimate_distribution[key] += td_est.seconds/3600.0
+                else:
+                    if default_estimate != 0:
+                        estimate_distribution[key] += default_estimate
+            except:
+                pass
+
+            try:
+                if 'spent' in task.attributes:
+                    td_est = parse_duration(task.attributes['spent'][0].replace('min','m'))
+                    spent_distribution[key] += td_est.seconds/3600.0
+            except:
+                pass
+
+    spent_distribution = {key:item for key, item in spent_distribution.items() if item > 0}
+    estimate_distribution = {key:item for key, item in estimate_distribution.items() if item > 0}
+    num_distribution = {key:item for key, item in num_distribution.items() if item > 0}
+
+    return spent_distribution, estimate_distribution, num_distribution
+
 
 def calculate_error(tasks, default_estimate=0):
 

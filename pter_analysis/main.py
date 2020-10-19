@@ -56,6 +56,63 @@ def cli():
     pass
 
 
+
+@cli.group()
+def distribution():
+    pass
+
+
+@distribution.command()
+@click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
+def projects(config, default_estimate, todotxt):
+    '''Plots the distribution of spent time, estimated time and task frequency over projects
+    '''
+
+    def escape(x):
+        x = x.replace('_',' ')
+        return x
+
+    cfg, todo = prepare(todotxt, config)
+
+    dy = 0.1
+    rot = 70
+
+    spent, est, num = analysis.distribute_projects(todo, default_estimate=default_estimate)
+
+    fig, ax = plt.subplots()
+    ax.set_title('Total time spent per project')
+    ax.bar([escape(x) for x in spent], [spent[x] for x in spent])
+    ax.set_ylabel('Time [h]')
+    ax.set_xticklabels([escape(x) for x in spent], rotation=rot)
+    pos = ax.get_position()
+    pos.y0 += dy
+    ax.set_position(pos)
+
+    fig, ax = plt.subplots()
+    ax.set_title('Total time estimated time left per project')
+    ax.bar([escape(x) for x in est], [est[x] for x in est])
+    ax.set_ylabel('Time [h]')
+    ax.set_xticklabels([escape(x) for x in est], rotation=rot)
+    pos = ax.get_position()
+    pos.y0 += dy
+    ax.set_position(pos)
+
+    fig, ax = plt.subplots()
+    ax.set_title('Tasks left per project')
+    ax.bar([escape(x) for x in num], [num[x] for x in num])
+    ax.set_ylabel('Frequency')
+    ax.set_xticklabels([escape(x) for x in num], rotation=rot)
+    pos = ax.get_position()
+    pos.y0 += dy
+    ax.set_position(pos)
+
+    plt.show()
+
+
+
+
 @cli.command()
 @click.argument('SEARCH', nargs=-1)
 @click.option('--config', default=CONFIGFILE, help='Path to config file')
