@@ -34,7 +34,7 @@ def calculate_total_activity(tasks, h_per_day):
 
         end.append(datetime.date.fromisoformat(due))
 
-        td = parse_duration(task.attributes['estimate'])
+        td = parse_duration(task.attributes['estimate'][0])
         duration.append(td.seconds/3600.0)
 
     duration = np.array(duration) 

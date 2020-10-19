@@ -11,7 +11,7 @@ import matplotlib.dates as mdates
 import numpy as np
 
 #Pter and pytodotxt
-from pytodotxt import TodoTxt
+from pytodotxt import TodoTxt, Task
 from pter.utils import parse_duration
 from pter.searcher import Searcher
 
@@ -35,7 +35,7 @@ def prepare(todotxt, config, search):
         cfg.getboolean('General', 'search-case-sensitive'),
     )
 
-    sel_tasks = [task for task in tasks if sch.match(todo.tasks)]
+    sel_tasks = [task for task in todo.tasks if sch.match(task)]
 
     return cfg, sel_tasks
 
@@ -48,11 +48,15 @@ def cli():
 
 
 @cli.command()
-@click.option('--search', default='', type=str, help='Pter type search string')
+@click.argument('SEARCH', default='', type=str, required=False)
+@click.argument('TODOTXT', default='', type=str, required=False)
 @click.option('--config', default=CONFIGFILE, help='Path to config file')
-@click.argument('todotxt', default='', type=str, required=False, help='Path to todotxt file file')
-def burndown(todotxt, config, search):
-    '''Creates a burndown chart for the selection.
+def burndown(config, search, todotxt):
+    '''Creates a burn-down chart for the selection.
+
+    SEARCH: Pter-type search string
+
+    TODOTXT: Path to the todotxt file to analyse
     '''
 
     cfg, tasks = prepare(todotxt, config, search)
@@ -67,6 +71,9 @@ def burndown(todotxt, config, search):
     if cfg.getboolean('General', 'usetex'):
         plt.rc('text', usetex=True)
 
+    style = cfg.get('General', 'matplotlib-style')
+    if len(style) > 0:
+        plt.style.use(style)
 
     fig, ax = plt.subplots(1, 1, constrained_layout=True, figsize=(6, 6))
     locator = mdates.AutoDateLocator(minticks=3, maxticks=7)
@@ -79,25 +86,112 @@ def burndown(todotxt, config, search):
         ax.axvline(end[ind], color='r', alpha=0.1)
     max_activity = 100
 
-    activity_label = ''
-    if len(context) > 0:
-        activity_label += f'@{context} '
-    if len(project) > 0:
-        activity_label += f'+{project}'
-
-    if ref_activity is None:
-        activity_label = 'Total activity'
-    else:
-        if ref_activity.max()*100 > max_activity:
-            max_activity = ref_activity.max()*100
-        ax.plot(ref_dates, ref_activity*100, color='k', label='Total activity')
-
     if total_activity.max()*100 > max_activity:
             max_activity = total_activity.max()*100
-    ax.plot(dates, total_activity*100, color='m', label=activity_label)
-    ax.set_title('Nominal workload task burn-down',fontsize=24)
-    ax.set_ylabel('Full-time workload [\%]',fontsize=20)
+    ax.plot(dates, total_activity*100, color='m', label=search)
+    ax.set_title('Nominal workload task burn-down')
+    ax.set_ylabel('Full-time workload [\%]')
     ax.set_ylim([0,max_activity])
-    ax.legend(fontsize=16)
+    ax.set_xlim([datetime.datetime.today(),None])
+    ax.legend()
 
+    plt.show()
+
+
+@cli.command()
+@click.argument('SEARCH', default='', type=str, required=False)
+@click.argument('TODOTXT', default='', type=str, required=False)
+@click.option('--config', default=CONFIGFILE, help='Path to config file')
+def timeline(config, search, todotxt):
+    '''Creates a timeline chart for the due dates of the selection.
+
+    SEARCH: Pter-type search string
+
+    TODOTXT: Path to the todotxt file to analyse
+    '''
+    cfg, tasks = prepare(todotxt, config, search)
+
+    def rem_tag(description, regex):
+        while True:
+            matches = parse_tags(description, regex)
+            if len(matches) == 0:
+                break
+            for match in matches:
+                start, end = match.span()
+                description = description[:start] + description[end:]
+                break
+        return description
+
+    def parse_tags(description, regex):
+        matches = []
+        if description is None:
+            return matches
+
+        for match in regex.finditer(description):
+            if match:
+                matches.append(match)
+            else:
+                break
+        return matches 
+
+    dates = []
+    names = []
+    for task in tasks:
+        if 'due' not in task.attributes:
+            continue
+        due = task.attributes['due'][0].strip()
+        due = due.replace(',','')
+        dates.append(datetime.date.fromisoformat(due))
+        name = task.description
+
+        name = rem_tag(name, Task.PROJECT_RE)
+        name = rem_tag(name, Task.CONTEXT_RE)
+        name_short = name[:15]
+
+        if len(name) > 15:
+            name_short += '...'
+        names.append(name_short)
+
+    if len(dates) == 0:
+        raise ValueError('No tasks found with due-dates in search')
+
+    levs = [-5, 5, -3, 3, -1, 1]
+    if len(dates) < len(levs):
+        levs = levs[:len(dates)]
+
+    levels = np.tile(
+        levs, 
+        int(np.ceil(len(dates)/len(levs))),
+    )[:len(dates)]
+
+    # Create figure and plot a stem plot with the date
+    fig, ax = plt.subplots(figsize=(8.8, 4), constrained_layout=True)
+    ax.set(title=search)
+
+    markerline, stemline, baseline = ax.stem(dates, levels,
+                                             linefmt="C3-", basefmt="k-",
+                                             use_line_collection=True)
+
+    plt.setp(markerline, mec="k", mfc="w", zorder=3)
+
+    # Shift the markers to the baseline by replacing the y-data by zeros.
+    markerline.set_ydata(np.zeros(len(dates)))
+
+    # annotate lines
+    vert = np.array(['top', 'bottom'])[(levels > 0).astype(int)]
+    for d, l, r, va in zip(dates, levels, names, vert):
+        ax.annotate(r, xy=(d, l), xytext=(-3, np.sign(l)*3),
+                    textcoords="offset points", va=va, ha="right")
+
+    # format xaxis with 4 month intervals
+    ax.get_xaxis().set_major_locator(mdates.MonthLocator(interval=4))
+    ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%b %Y"))
+    plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
+
+    # remove y axis and spines
+    ax.get_yaxis().set_visible(False)
+    for spine in ["left", "top", "right"]:
+        ax.spines[spine].set_visible(False)
+
+    ax.margins(y=0.1)
     plt.show()

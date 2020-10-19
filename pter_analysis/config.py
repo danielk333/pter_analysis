@@ -23,16 +23,16 @@ DEFAULT_CONFIG = {
         'work-day-length': '8h',
         'work-week-length': '5d',
         'todotxt-file': '',
-        'matplotlib-style': 'dark',
+        'matplotlib-style': 'Solarize_Light2',
         'usetex': 'True',
         'search-case-sensitive': 'True',
     },
 }
 
-def get_config(path):
+def get_config(pth):
     config = configparser.ConfigParser(interpolation=None)
     config.read_dict(DEFAULT_CONFIG)
-    conffile = pathlib.Path(os.path.abspath(os.path.expanduser(args.config)))
+    conffile = pathlib.Path(os.path.abspath(os.path.expanduser(pth)))
 
     if conffile.exists() and conffile.is_file():
         config.read([conffile])
