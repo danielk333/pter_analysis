@@ -86,16 +86,30 @@ def calculate_total_activity(tasks, h_per_day, default_estimate=0):
 
     return dates, total_activity, start, end
 
-
-def distribute_projects(todo, default_estimate=0):
-
+def group_projects(tasks):
     task_distribution = dict()
-    for task in todo.tasks:
+    for task in tasks:
         for project in task.projects:
             if project not in task_distribution:
                 task_distribution[project] = [task]
             else:
                 task_distribution[project] += [task]
+    return task_distribution
+
+
+def get_ages(tasks):
+    ages = []
+    for task in tasks:
+        if task.creation_date is None or not task.is_completed:
+            continue
+        dt = task.completion_date - task.creation_date
+        ages.append(dt.days)
+    return ages
+
+
+def distribute_projects(todo, default_estimate=0):
+
+    task_distribution = group_projects(todo.tasks)
 
     spent_distribution = {key:0 for key in task_distribution}
     estimate_distribution = {key:0 for key in task_distribution}

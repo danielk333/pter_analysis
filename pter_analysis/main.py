@@ -19,6 +19,10 @@ from pter.searcher import Searcher
 from .config import get_config, CONFIGFILE
 from . import analysis
 
+def escape(x):
+    x = x.replace('_',' ')
+    return x
+
 def prepare(todotxt, config):
     cfg = get_config(config)
 
@@ -70,9 +74,6 @@ def projects(config, default_estimate, todotxt):
     '''Plots the distribution of spent time, estimated time and task frequency over projects
     '''
 
-    def escape(x):
-        x = x.replace('_',' ')
-        return x
 
     cfg, todo = prepare(todotxt, config)
 
@@ -146,10 +147,58 @@ def ages(config, default_estimate, todotxt, search):
 
 @distribution.command()
 @click.argument('SEARCH', nargs=-1)
+@click.option('--projects', is_flag=True, help='Divide the distribution into projects')
 @click.option('--config', default=CONFIGFILE, help='Path to config file')
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
 @click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
-def completion(config, default_estimate, todotxt, search):
+def completion(config, default_estimate, todotxt, projects, search):
+    '''Plots the distribution of task age
+
+    SEARCH: Pter-type search strings (multiple searches are given by space separation)
+    '''
+
+    cfg, todo = prepare(todotxt, config)
+
+    for sch in search:
+        tasks = apply_serach(cfg, todo, sch)
+
+        if projects:
+            task_distribution = analysis.group_projects(tasks)
+            proj_compl = []
+            for proj in task_distribution:
+                proj_compl.append(analysis.get_ages(task_distribution[proj]))
+
+            fig, ax = plt.subplots()
+            ax.set_title(f'{sch}: Task completion time distribution')
+            ax.boxplot(proj_compl)
+
+            xtics = list(task_distribution.keys())
+            xtics = [escape(x) for x in xtics]
+            ax.set_xticklabels(xtics, rotation=45)
+            
+            ax.set_ylabel('Completion time [d]')
+            
+            pos = ax.get_position()
+            pos.y0 += 0.1
+            ax.set_position(pos)
+
+        else:
+            compl = analysis.get_ages(tasks)
+            fig, ax = plt.subplots()
+            ax.set_title(f'{sch}: Task completion time distribution')
+            ax.hist(compl)
+            ax.set_xlabel('Completion time [d]')
+            ax.set_ylabel('Frequency')
+
+    plt.show()
+
+
+@distribution.command()
+@click.argument('SEARCH', nargs=-1)
+@click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
+def delay(config, default_estimate, todotxt, search):
     '''Plots the distribution of task age
 
     SEARCH: Pter-type search strings (multiple searches are given by space separation)
@@ -162,13 +211,13 @@ def completion(config, default_estimate, todotxt, search):
 
         ages = []
         for task in tasks:
-            if task.creation_date is None or not task.is_completed:
+            if 'due' not in task.attributes or 't' not in task.attributes:
                 continue
-            dt = task.completion_date - task.creation_date
+            dt = parse_duration(task.attributes['t'][0]) - parse_duration(task.attributes['due'][0])
             ages.append(dt.days)
 
         fig, ax = plt.subplots()
-        ax.set_title(f'{sch}: Task completion time distribution')
+        ax.set_title(f'{sch}: Task delay time distribution')
         ax.hist(ages)
         ax.set_xlabel('Completion time [d]')
         ax.set_ylabel('Frequency')
