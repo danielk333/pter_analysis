@@ -112,6 +112,70 @@ def projects(config, default_estimate, todotxt):
 
 
 
+@distribution.command()
+@click.argument('SEARCH', nargs=-1)
+@click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
+def ages(config, default_estimate, todotxt, search):
+    '''Plots the distribution of task age
+
+    SEARCH: Pter-type search strings (multiple searches are given by space separation)
+    '''
+
+    cfg, todo = prepare(todotxt, config)
+
+    for sch in search:
+        tasks = apply_serach(cfg, todo, sch)
+
+        ages = []
+        for task in tasks:
+            if task.creation_date is None:
+                continue
+            dt = datetime.date.today() - task.creation_date
+            ages.append(dt.days)
+
+        fig, ax = plt.subplots()
+        ax.set_title(f'{sch}: Task age distribution')
+        ax.hist(ages)
+        ax.set_xlabel('Age [d]')
+        ax.set_ylabel('Frequency')
+
+    plt.show()
+
+
+@distribution.command()
+@click.argument('SEARCH', nargs=-1)
+@click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
+def completion(config, default_estimate, todotxt, search):
+    '''Plots the distribution of task age
+
+    SEARCH: Pter-type search strings (multiple searches are given by space separation)
+    '''
+
+    cfg, todo = prepare(todotxt, config)
+
+    for sch in search:
+        tasks = apply_serach(cfg, todo, sch)
+
+        ages = []
+        for task in tasks:
+            if task.creation_date is None or not task.is_completed:
+                continue
+            dt = task.completion_date - task.creation_date
+            ages.append(dt.days)
+
+        fig, ax = plt.subplots()
+        ax.set_title(f'{sch}: Task completion time distribution')
+        ax.hist(ages)
+        ax.set_xlabel('Completion time [d]')
+        ax.set_ylabel('Frequency')
+
+    plt.show()
+
+
 
 @cli.command()
 @click.argument('SEARCH', nargs=-1)
