@@ -97,6 +97,23 @@ def group_projects(tasks):
     return task_distribution
 
 
+def get_delays(tasks):
+    delays = []
+    for task in tasks:
+        if 'due' not in task.attributes or 't' not in task.attributes:
+            continue
+        due = task.attributes['due'][0].strip()
+        due = due.replace(',','')
+        due = datetime.date.fromisoformat(due)
+
+        t = task.attributes['t'][0].strip()
+        t = t.replace(',','')
+        t = datetime.date.fromisoformat(t)
+        dt = t - due
+        delays.append(dt.days)
+    return delays
+
+
 def get_ages(tasks):
     ages = []
     for task in tasks:

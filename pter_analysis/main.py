@@ -196,9 +196,9 @@ def completion(config, default_estimate, todotxt, projects, search):
 @distribution.command()
 @click.argument('SEARCH', nargs=-1)
 @click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--projects', is_flag=True, help='Divide the distribution into projects')
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
-@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
-def delay(config, default_estimate, todotxt, search):
+def delay(config, projects, todotxt, search):
     '''Plots the distribution of task age
 
     SEARCH: Pter-type search strings (multiple searches are given by space separation)
@@ -209,18 +209,33 @@ def delay(config, default_estimate, todotxt, search):
     for sch in search:
         tasks = apply_serach(cfg, todo, sch)
 
-        ages = []
-        for task in tasks:
-            if 'due' not in task.attributes or 't' not in task.attributes:
-                continue
-            dt = parse_duration(task.attributes['t'][0]) - parse_duration(task.attributes['due'][0])
-            ages.append(dt.days)
+        if projects:
+            task_distribution = analysis.group_projects(tasks)
+            proj_compl = []
+            for proj in task_distribution:
+                proj_compl.append(analysis.get_delays(task_distribution[proj]))
 
-        fig, ax = plt.subplots()
-        ax.set_title(f'{sch}: Task delay time distribution')
-        ax.hist(ages)
-        ax.set_xlabel('Completion time [d]')
-        ax.set_ylabel('Frequency')
+            fig, ax = plt.subplots()
+            ax.set_title(f'{sch}: Task delay time distribution')
+            ax.boxplot(proj_compl)
+
+            xtics = list(task_distribution.keys())
+            xtics = [escape(x) for x in xtics]
+            ax.set_xticklabels(xtics, rotation=45)
+            
+            ax.set_ylabel('Delay time [d]')
+            
+            pos = ax.get_position()
+            pos.y0 += 0.1
+            ax.set_position(pos)
+
+        else:
+            delays = analysis.get_delays(tasks)
+            fig, ax = plt.subplots()
+            ax.set_title(f'{sch}: Task delay time distribution')
+            ax.hist(delays)
+            ax.set_xlabel('Delay time [d]')
+            ax.set_ylabel('Frequency')
 
     plt.show()
 
@@ -288,10 +303,13 @@ def burndown(config, default_estimate, todotxt, search):
     max_activity = 100
 
     total_activity = None
+    total_dates = None
 
     for sch in search:
         tasks = apply_serach(cfg, todo, sch)
         dates, activity, start, end = analysis.calculate_total_activity(tasks, h_per_day, default_estimate=default_estimate)
+
+        
 
         for ind in range(len(start)):
             if axv_legend:
@@ -309,11 +327,19 @@ def burndown(config, default_estimate, todotxt, search):
 
         if total_activity is None:
             total_activity = activity.copy()
+            total_dates = dates.copy()
         else:
-            total_activity += activity
+            if len(dates) > len(total_dates):
+                total_dates = dates.copy()
+                total_activity_ = np.zeros(total_dates.shape, dtype=total_activity.dtype)
+                total_activity_[:len(total_activity)] = total_activity
+                total_activity = total_activity_;
+
+            total_activity[:len(activity)] += activity
+
 
     if len(search) > 1:
-        ax.plot(dates, total_activity*100, '--k', label='Total activity')
+        ax.plot(total_dates, total_activity*100, '--k', label='Total activity')
 
     ax.set_title('Nominal workload task burn-down')
     ax.set_ylabel('Full-time workload [\%]')
