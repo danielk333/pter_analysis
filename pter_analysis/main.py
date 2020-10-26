@@ -273,6 +273,69 @@ def accuracy(config, default_estimate, todotxt, search):
 
 
 
+@cli.command()
+@click.argument('SEARCH', nargs=-1)
+@click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--start', default='', type=str, help='Starting date in ISO format')
+@click.option('--end', default='', type=str, help='Ending date in ISO format')
+@click.option('--out', default='rst', type=str, help='Output format, can be [rst|html|txt]')
+def done(config, start, end, out, todotxt, search):
+    '''Prints completion lists
+
+    SEARCH: Pter-type search strings (multiple searches are given by space separation)
+    '''
+
+
+    cfg, todo = prepare(todotxt, config)
+    tasks = []
+    for sch in search:
+        tasks += apply_serach(cfg, todo, sch)
+
+    tasks = [task for task in tasks if task.completion_date is not None]
+    if len(start) > 0:
+        start = datetime.date.fromisoformat(start)
+        tasks = [
+            task for task in tasks 
+            if task.completion_date >= start
+        ]
+    if len(end) > 0:
+        end = datetime.date.fromisoformat(end)
+        tasks = [
+            task for task in tasks 
+            if task.completion_date <= end
+        ]
+
+    tasks.sort(key = lambda x: x.completion_date)
+
+    out_text = ''
+    if out == 'rst':
+
+        cdate = None
+        for task in tasks:
+            if cdate is None:
+                cdate = task.completion_date
+                add_header = True
+            else:
+                if cdate != task.completion_date:
+                    add_header = True
+                    out_text += '\n'*3
+                else:
+                    add_header = False
+
+            if add_header:
+                out_text += str(task.completion_date) + '\n'
+                out_text += '='*len(str(task.completion_date))
+                out_text += '\n'*2
+
+            out_text += '- ' + task.description
+    else:
+        raise NotImplementedError('Sorry not implemented yet')
+
+
+    print(out_text)
+
+
 
 @cli.command()
 @click.argument('SEARCH', nargs=-1)
