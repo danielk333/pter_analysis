@@ -63,6 +63,8 @@ def cli():
 
 @cli.group()
 def distribution():
+    '''A subset of commands that creates distributions of tasks.
+    '''
     pass
 
 
@@ -71,7 +73,7 @@ def distribution():
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
 @click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
 def projects(config, default_estimate, todotxt):
-    '''Plots the distribution of spent time, estimated time and task frequency over projects
+    '''Plots the distribution of spent time, estimated time and task frequency over projects.
     '''
 
 
@@ -119,9 +121,9 @@ def projects(config, default_estimate, todotxt):
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
 @click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
 def ages(config, default_estimate, todotxt, search):
-    '''Plots the distribution of task age
+    '''Plots the distribution of task age.
 
-    SEARCH: Pter-type search strings (multiple searches are given by space separation)
+        SEARCH: Pter-type search strings (multiple searches are given by space separation)
     '''
 
     cfg, todo = prepare(todotxt, config)
@@ -152,9 +154,9 @@ def ages(config, default_estimate, todotxt, search):
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
 @click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
 def completion(config, default_estimate, todotxt, projects, search):
-    '''Plots the distribution of task age
+    '''Plots the distribution of task time to completion.
 
-    SEARCH: Pter-type search strings (multiple searches are given by space separation)
+        SEARCH: Pter-type search strings (multiple searches are given by space separation)
     '''
 
     cfg, todo = prepare(todotxt, config)
@@ -199,9 +201,9 @@ def completion(config, default_estimate, todotxt, projects, search):
 @click.option('--projects', is_flag=True, help='Divide the distribution into projects')
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
 def delay(config, projects, todotxt, search):
-    '''Plots the distribution of task age
+    '''Plots the distribution of task delays.
 
-    SEARCH: Pter-type search strings (multiple searches are given by space separation)
+        SEARCH: Pter-type search strings (multiple searches are given by space separation)
     '''
 
     cfg, todo = prepare(todotxt, config)
@@ -247,7 +249,7 @@ def delay(config, projects, todotxt, search):
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
 @click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
 def accuracy(config, default_estimate, todotxt, search):
-    '''Checks the prediction accuracy for the searches
+    '''Checks the prediction accuracy for the searches.
 
     SEARCH: Pter-type search strings (multiple searches are given by space separation)
     '''
@@ -281,7 +283,7 @@ def accuracy(config, default_estimate, todotxt, search):
 @click.option('--end', default='', type=str, help='Ending date in ISO format')
 @click.option('--out', default='rst', type=str, help='Output format, can be [rst|html|txt]')
 def done(config, start, end, out, todotxt, search):
-    '''Prints completion lists
+    '''Prints completion lists.
 
     SEARCH: Pter-type search strings (multiple searches are given by space separation)
     '''
@@ -311,26 +313,60 @@ def done(config, start, end, out, todotxt, search):
     out_text = ''
     if out == 'rst':
 
-        cdate = None
-        for task in tasks:
-            if cdate is None:
-                cdate = task.completion_date
-                add_header = True
-            else:
-                if cdate != task.completion_date:
-                    add_header = True
-                    out_text += '\n'*3
-                else:
-                    add_header = False
+        def add_row(text):
+            return '- ' + text
 
-            if add_header:
-                out_text += str(task.completion_date) + '\n'
-                out_text += '='*len(str(task.completion_date))
-                out_text += '\n'*2
+        def add_header(text, first):
+            out_text = ''
+            if not first:
+                out_text += '\n'*3
+            out_text += str(text) + '\n'
+            out_text += '='*len(str(text))
+            out_text += '\n'*2
+            return out_text
 
-            out_text += '- ' + task.description
+    elif out == 'html':
+
+        out_text += '<html><body>\n'
+
+        def add_row(text):
+            return '<li>' + text + '</li>\n'
+
+        def add_header(text, first):
+            out_text = ''
+            if not first:
+                out_text += '</ul>\n'
+            out_text += '<h2>' + str(text) + '</h2>\n'
+            out_text += '<ul>\n'
+            return out_text
+
     else:
         raise NotImplementedError('Sorry not implemented yet')
+
+
+    cdate = None
+    for ti,task in enumerate(tasks):
+        if cdate is None:
+            cdate = task.completion_date
+            new_header = True
+        else:
+            if cdate != task.completion_date:
+                new_header = True
+            else:
+                new_header = False
+
+        if new_header:
+            out_text += add_header(task.completion_date, first = ti==0)
+
+        out_text += add_row(task.description)
+
+        cdate = task.completion_date
+
+
+    if out == 'rst':
+        pass
+    elif out == 'html':
+        out_text += '</ul></body></html>'
 
 
     print(out_text)
@@ -340,13 +376,19 @@ def done(config, start, end, out, todotxt, search):
 @cli.command()
 @click.argument('SEARCH', nargs=-1)
 @click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--end', default='', type=str, help='End date for burndown chart (ISO format)')
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
 @click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
-def burndown(config, default_estimate, todotxt, search):
+def burndown(config, default_estimate, todotxt, end, search):
     '''Creates a burn-down chart for the selection.
 
     SEARCH: Pter-type search strings (multiple searches are given by space separation)
     '''
+
+    if len(end) > 0:
+        end_date = datetime.date.fromisoformat(end)
+    else:
+        end_date = None
 
     cfg, todo = prepare(todotxt, config)
     
@@ -370,7 +412,7 @@ def burndown(config, default_estimate, todotxt, search):
 
     for sch in search:
         tasks = apply_serach(cfg, todo, sch)
-        dates, activity, start, end = analysis.calculate_total_activity(tasks, h_per_day, default_estimate=default_estimate)
+        dates, activity, start, end = analysis.calculate_total_activity(tasks, h_per_day, default_estimate=default_estimate, end_date=end_date)
 
         
 
@@ -407,7 +449,7 @@ def burndown(config, default_estimate, todotxt, search):
     ax.set_title('Nominal workload task burn-down')
     ax.set_ylabel('Full-time workload [\%]')
     ax.set_ylim([0,max_activity])
-    ax.set_xlim([datetime.datetime.today(),None])
+    ax.set_xlim([datetime.datetime.today(),end_date])
     ax.legend()
 
     plt.show()

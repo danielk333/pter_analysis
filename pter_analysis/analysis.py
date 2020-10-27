@@ -8,7 +8,7 @@ import numpy as np
 #Pter and pytodotxt
 from pter.utils import parse_duration
 
-def calculate_total_activity(tasks, h_per_day, default_estimate=0):
+def calculate_total_activity(tasks, h_per_day, default_estimate=0, end_date=None):
 
     def _ok_task(task):
         ok = True
@@ -16,9 +16,11 @@ def calculate_total_activity(tasks, h_per_day, default_estimate=0):
             ok = False
         if task.creation_date is None:
             ok = False
-        if 'due' not in task.attributes:
+        if not ('due' in task.attributes or 't' in task.attributes):
             ok = False
         return ok
+
+
 
     start = []
     end = []
@@ -37,7 +39,10 @@ def calculate_total_activity(tasks, h_per_day, default_estimate=0):
                 duration.append(default_estimate)
 
         start.append(task.creation_date)
-        due = task.attributes['due'][0].strip()
+        if 't' in task.attributes:
+            due = task.attributes['t'][0].strip()
+        else:
+            due = task.attributes['due'][0].strip()
         due = due.replace(',','')
         due = datetime.date.fromisoformat(due)
 
@@ -62,7 +67,11 @@ def calculate_total_activity(tasks, h_per_day, default_estimate=0):
     activity = duration/work_time
     activity_orig = activity.copy()
 
-    dates = np.arange(datetime.date.today(), end.max())
+    if end_date is not None:
+        dates = np.arange(datetime.date.today(), end_date)
+    else:
+        dates = np.arange(datetime.date.today(), end.max())
+
     total_activity = np.empty(dates.shape)
     for ind, date in enumerate(dates):
         select = np.logical_and(date >= start, date <= end)
