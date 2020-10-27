@@ -217,12 +217,16 @@ def delay(config, projects, todotxt, search):
             for proj in task_distribution:
                 proj_compl.append(analysis.get_delays(task_distribution[proj]))
 
+            xtics = list(task_distribution.keys())
+            xtics = [escape(x) for x in xtics]
+
+            xtics = [x for ind, x in enumerate(xtics) if len(proj_compl[ind]) > 0]
+            proj_compl = [x for x in proj_compl if len(x) > 0]
+
             fig, ax = plt.subplots()
             ax.set_title(f'{sch}: Task delay time distribution')
             ax.boxplot(proj_compl)
 
-            xtics = list(task_distribution.keys())
-            xtics = [escape(x) for x in xtics]
             ax.set_xticklabels(xtics, rotation=45)
             
             ax.set_ylabel('Delay time [d]')
