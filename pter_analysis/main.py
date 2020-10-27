@@ -379,7 +379,8 @@ def done(config, start, end, out, todotxt, search):
 @click.option('--end', default='', type=str, help='End date for burndown chart (ISO format)')
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
 @click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
-def burndown(config, default_estimate, todotxt, end, search):
+@click.option('--default-delay', default=5, type=int, help='If "due" date and "t" tag is already passed, assume this many days delay')
+def burndown(config, default_estimate, default_delay, todotxt, end, search):
     '''Creates a burn-down chart for the selection.
 
     SEARCH: Pter-type search strings (multiple searches are given by space separation)
@@ -410,41 +411,34 @@ def burndown(config, default_estimate, todotxt, end, search):
     total_activity = None
     total_dates = None
 
-    for sch in search:
-        tasks = apply_serach(cfg, todo, sch)
-        dates, activity, start, end = analysis.calculate_total_activity(tasks, h_per_day, default_estimate=default_estimate, end_date=end_date)
-
+    all_tasks = [apply_serach(cfg, todo, sch) for sch in search]
+    dates, all_activity, all_start, all_end, total_activity = analysis.calculate_total_activity(
+        all_tasks, 
+        h_per_day, 
+        default_estimate=default_estimate, 
+        end_date=end_date, 
+        default_delay=default_delay,
+    )
         
+    for i, sch in enumerate(search):
+        activity, start, end = all_activity[i], all_start[i], all_end[i]
 
         for ind in range(len(start)):
             if axv_legend:
                 ax.axvline(start[ind], color='g', alpha=0.1)
                 ax.axvline(end[ind], color='r', alpha=0.1)
             else:
-                ax.axvline(start[ind], color='g', alpha=0.1, label='Task creation')
+                ax.axvline(start[ind], color='g', alpha=0.1, label='Task start')
                 ax.axvline(end[ind], color='r', alpha=0.1, label='Task due')
                 axv_legend = True
         
 
-        if activity.max()*100 > max_activity:
-                max_activity = activity.max()*100
+        if total_activity.max()*100 > max_activity:
+                max_activity = total_activity.max()*100
         ax.plot(dates, activity*100, label=sch)
 
-        if total_activity is None:
-            total_activity = activity.copy()
-            total_dates = dates.copy()
-        else:
-            if len(dates) > len(total_dates):
-                total_dates = dates.copy()
-                total_activity_ = np.zeros(total_dates.shape, dtype=total_activity.dtype)
-                total_activity_[:len(total_activity)] = total_activity
-                total_activity = total_activity_;
-
-            total_activity[:len(activity)] += activity
-
-
     if len(search) > 1:
-        ax.plot(total_dates, total_activity*100, '--k', label='Total activity')
+        ax.plot(dates, total_activity*100, '--k', label='Total activity')
 
     ax.set_title('Nominal workload task burn-down')
     ax.set_ylabel('Full-time workload [\%]')

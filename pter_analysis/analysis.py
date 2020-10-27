@@ -8,7 +8,7 @@ import numpy as np
 #Pter and pytodotxt
 from pter.utils import parse_duration
 
-def calculate_total_activity(tasks, h_per_day, default_estimate=0, end_date=None):
+def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default_delay=5, end_date=None):
 
     def _ok_task(task):
         ok = True
@@ -20,13 +20,25 @@ def calculate_total_activity(tasks, h_per_day, default_estimate=0, end_date=None
             ok = False
         return ok
 
+    today = datetime.date.today()
 
+    #create a master task list, remember origin
+    tasks = []
+    list_index = []
+    tlst_inds = list(range(len(tasks_lists)))
+    for tind, tlst in enumerate(tasks_lists):
+        tasks += tlst
+        list_index += [tind]*len(tlst)
+
+    list_index = np.array(list_index, dtype=np.int)
+    list_keep = np.full(list_index.shape, True, dtype=np.bool)
 
     start = []
     end = []
     duration = []
-    for task in tasks:
+    for ti, task in enumerate(tasks):
         if not _ok_task(task):
+            list_keep[ti] = False
             continue
 
         if 'estimate' in task.attributes:
@@ -46,17 +58,17 @@ def calculate_total_activity(tasks, h_per_day, default_estimate=0, end_date=None
         due = due.replace(',','')
         due = datetime.date.fromisoformat(due)
 
-        if due < datetime.date.today():
-            due = datetime.date.today() + datetime.timedelta(days=1)
+        if due < today:
+            due = today + datetime.timedelta(days=default_delay)
 
         end.append(due)
 
+    list_index = list_index[list_keep]
 
     duration = np.array(duration) 
     start = np.array(start)
     end = np.array(end)
 
-    activity = np.empty(duration.shape)
     work_time = np.empty(duration.shape)
 
     for ind in range(len(work_time)):
@@ -65,35 +77,71 @@ def calculate_total_activity(tasks, h_per_day, default_estimate=0, end_date=None
             work_time[ind] = h_per_day
 
     activity = duration/work_time
-    activity_orig = activity.copy()
 
     if end_date is not None:
-        dates = np.arange(datetime.date.today(), end_date)
+        dates = np.arange(today, end_date)
     else:
-        dates = np.arange(datetime.date.today(), end.max())
+        dates = np.arange(today, end.max())
 
     total_activity = np.empty(dates.shape)
+    sub_activites = [np.empty(dates.shape) for tind in tlst_inds]
+    mod_start = start.copy()
+    mod_start[mod_start < today] = today
+    mod_activity = activity.copy()
     for ind, date in enumerate(dates):
-        select = np.logical_and(date >= start, date <= end)
-        select_inds = np.argwhere(select)
-        total_activity[ind] = np.sum(activity[select])
-        while total_activity[ind] > 1.0 and ind+1 < len(dates):
-            mv = select_inds[np.argmax(end[select_inds])][0]
-            if date == end[mv]:
-                break
-            start[mv] = dates[ind+1]
 
-            select = np.logical_and(date >= start, date <= end)
+        #Select active tasks
+        select = np.logical_and(date >= mod_start, date <= end) 
+        select_inds = np.argwhere(select)
+
+        #this should never happen
+        assert len(select_inds) > 0, 'what?'
+
+        #calculate date-activity
+        date_activity = np.sum(mod_activity[select])
+        sub_acts = [np.sum(mod_activity[np.logical_and(select, list_index==tind)]) for tind in tlst_inds]
+
+        #push forward start of task to reduce activity < 100%
+        while date_activity > 1.0 and ind+1 < len(dates):
+            #we cannot push stuff back anymore, just leave it
+            if len(select_inds) <= 1:
+                break
+
+            #select the one we can push the most
+            mv = select_inds[np.argmax(end[select_inds])][0]
+
+            #if we cannot push even that, just reset to original start and move on
+            if date == end[mv]:
+                mod_start[mv] = start[mv]
+                if mod_start[mv] < today:
+                    mod_start[mv] = today
+                break
+
+            #push task forward
+            mod_start[mv] = dates[ind+1]
+
+            #re-select (i.e. not the pushed back)
+            select = np.logical_and(date >= mod_start, date <= end) 
             select_inds = np.argwhere(select)
 
-            work_time[mv] = np.busday_count(start[mv], end[mv])*h_per_day
+            #re-calculate activity for that task
+            work_time[mv] = np.busday_count(mod_start[mv], end[mv])*h_per_day
             if work_time[mv] == 0:
                 work_time[mv] = h_per_day
-            activity[mv] = duration[mv]/work_time[mv]
-            total_activity[ind] = np.sum(activity[select])
+            mod_activity[mv] = duration[mv]/work_time[mv]
 
+            #update activity
+            date_activity = np.sum(mod_activity[select])
+            sub_acts = [np.sum(mod_activity[np.logical_and(select, list_index==tind)]) for tind in tlst_inds]
 
-    return dates, total_activity, start, end
+        total_activity[ind] = date_activity
+        for tind in tlst_inds:
+            sub_activites[tind][ind] = sub_acts[tind]
+
+    sub_starts = [mod_start[list_index==tind] for tind in tlst_inds]
+    sub_ends = [end[list_index==tind] for tind in tlst_inds]
+
+    return dates, sub_activites, sub_starts, sub_ends, total_activity
 
 def group_projects(tasks):
     task_distribution = dict()
