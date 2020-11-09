@@ -69,20 +69,24 @@ def distribution():
 
 
 @distribution.command()
+@click.argument('SEARCH', type=str)
 @click.option('--config', default=CONFIGFILE, help='Path to config file')
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--show-all', is_flag=True, help='Show all projects')
 @click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
-def projects(config, default_estimate, todotxt):
+def projects(search, config, default_estimate, show_all, todotxt):
     '''Plots the distribution of spent time, estimated time and task frequency over projects.
     '''
 
 
     cfg, todo = prepare(todotxt, config)
 
+    tasks = apply_serach(cfg, todo, search)
+
     dy = 0.1
     rot = 70
 
-    spent, est, num = analysis.distribute_projects(todo, default_estimate=default_estimate)
+    spent, est, num = analysis.distribute_projects(tasks, default_estimate=default_estimate, filter_zero=not show_all)
 
     fig, ax = plt.subplots()
     ax.set_title('Total time spent per project')
@@ -94,7 +98,7 @@ def projects(config, default_estimate, todotxt):
     ax.set_position(pos)
 
     fig, ax = plt.subplots()
-    ax.set_title('Total time estimated time left per project')
+    ax.set_title('Total estimated time left per project')
     ax.bar([escape(x) for x in est], [est[x] for x in est])
     ax.set_ylabel('Time [h]')
     ax.set_xticklabels([escape(x) for x in est], rotation=rot)
@@ -199,8 +203,9 @@ def completion(config, default_estimate, todotxt, projects, search):
 @click.argument('SEARCH', nargs=-1)
 @click.option('--config', default=CONFIGFILE, help='Path to config file')
 @click.option('--projects', is_flag=True, help='Divide the distribution into projects')
+@click.option('--show-all', is_flag=True, help='Show all projects')
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
-def delay(config, projects, todotxt, search):
+def delay(config, projects, show_all, todotxt, search):
     '''Plots the distribution of task delays.
 
         SEARCH: Pter-type search strings (multiple searches are given by space separation)
@@ -220,8 +225,12 @@ def delay(config, projects, todotxt, search):
             xtics = list(task_distribution.keys())
             xtics = [escape(x) for x in xtics]
 
-            xtics = [x for ind, x in enumerate(xtics) if len(proj_compl[ind]) > 0]
-            proj_compl = [x for x in proj_compl if len(x) > 0]
+            if show_all:
+                xtics = [x for ind, x in enumerate(xtics)]
+                proj_compl = [x for x in proj_compl]
+            else:
+                xtics = [x for ind, x in enumerate(xtics) if len(proj_compl[ind]) > 0]
+                proj_compl = [x for x in proj_compl if len(x) > 0]
 
             fig, ax = plt.subplots()
             ax.set_title(f'{sch}: Task delay time distribution')
@@ -384,7 +393,8 @@ def done(config, start, end, out, todotxt, search):
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
 @click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
 @click.option('--default-delay', default=5, type=int, help='If "due" date and "t" tag is already passed, assume this many days delay')
-def burndown(config, default_estimate, default_delay, todotxt, end, search):
+@click.option('--adaptive', is_flag=True, help='Use adaptive work distribution algorithm trying to keep 100% activity')
+def burndown(config, default_estimate, default_delay, todotxt, end, search, adaptive):
     '''Creates a burn-down chart for the selection.
 
     SEARCH: Pter-type search strings (multiple searches are given by space separation)
@@ -422,6 +432,7 @@ def burndown(config, default_estimate, default_delay, todotxt, end, search):
         default_estimate=default_estimate, 
         end_date=end_date, 
         default_delay=default_delay,
+        adaptive = adaptive,
     )
         
     for i, sch in enumerate(search):

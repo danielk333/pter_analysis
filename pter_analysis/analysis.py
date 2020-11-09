@@ -8,7 +8,7 @@ import numpy as np
 #Pter and pytodotxt
 from pter.utils import parse_duration
 
-def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default_delay=5, end_date=None):
+def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default_delay=5, end_date=None, adaptive=True):
 
     def _ok_task(task):
         ok = True
@@ -42,7 +42,17 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
             continue
 
         if 'estimate' in task.attributes:
-            td = parse_duration(task.attributes['estimate'][0])
+
+            if 'spent' in task.attributes:
+                try:
+                    td = parse_duration(task.attributes['estimate'][0]) - parse_duration(task.attributes['spent'][0])
+                    if td < 0:
+                        td = timedelta(seconds=0)
+                except:
+                    td = parse_duration(task.attributes['estimate'][0])
+            else:
+                td = parse_duration(task.attributes['estimate'][0])
+
             duration.append(td.seconds/3600.0)
         else:
             if default_estimate == 0:
@@ -102,23 +112,45 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
         sub_acts = [np.sum(mod_activity[np.logical_and(select, list_index==tind)]) for tind in tlst_inds]
 
         #push forward start of task to reduce activity < 100%
-        while date_activity > 1.0 and ind+1 < len(dates):
-            #we cannot push stuff back anymore, just leave it
+        while date_activity > 1.0 and ind < len(dates) and adaptive:
+            break_at_end = False
+
             if len(select_inds) <= 1:
-                break
-
-            #select the one we can push the most
-            mv = select_inds[np.argmax(end[select_inds])][0]
-
-            #if we cannot push even that, just reset to original start and move on
-            if date == end[mv]:
+                #we cannot push stuff back anymore, just leave it
+                mv = select_inds[0]
                 mod_start[mv] = start[mv]
                 if mod_start[mv] < today:
                     mod_start[mv] = today
-                break
+                break_at_end = True
 
-            #push task forward
-            mod_start[mv] = dates[ind+1]
+            else:
+
+                #select the one we can push the most
+                mv = select_inds[np.argmax(end[select_inds])][0]
+                
+                if date == dates[-2]:
+                    #we are at the end, and cant manage, just rest all
+                    for mmv in select_inds.flatten():
+                        mod_start[mmv] = start[mmv]
+                        if mod_start[mmv] < today:
+                            mod_start[mmv] = today
+                    
+                        #re-calculate activity for that task
+                        work_time[mmv] = np.busday_count(mod_start[mmv], end[mmv])*h_per_day
+                        if work_time[mmv] == 0:
+                            work_time[mmv] = h_per_day
+                        mod_activity[mmv] = duration[mmv]/work_time[mmv]
+                    break_at_end = True
+
+                elif date == end[mv]:
+                    #if we cannot push even that, just reset to original start and move on
+                    mod_start[mv] = start[mv]
+                    if mod_start[mv] < today:
+                        mod_start[mv] = today
+                    break_at_end = True
+                else:
+                    #push task forward
+                    mod_start[mv] = dates[ind+1]
 
             #re-select (i.e. not the pushed back)
             select = np.logical_and(date >= mod_start, date <= end) 
@@ -134,6 +166,9 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
             date_activity = np.sum(mod_activity[select])
             sub_acts = [np.sum(mod_activity[np.logical_and(select, list_index==tind)]) for tind in tlst_inds]
 
+            if break_at_end:
+                break
+
         total_activity[ind] = date_activity
         for tind in tlst_inds:
             sub_activites[tind][ind] = sub_acts[tind]
@@ -144,8 +179,12 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
     return dates, sub_activites, sub_starts, sub_ends, total_activity
 
 def group_projects(tasks):
-    task_distribution = dict()
+    task_distribution = dict(No_project = [])
     for task in tasks:
+        if len(task.projects) == 0:
+            task_distribution['No_project'] += [task]
+            continue
+
         for project in task.projects:
             if project not in task_distribution:
                 task_distribution[project] = [task]
@@ -181,9 +220,9 @@ def get_ages(tasks):
     return ages
 
 
-def distribute_projects(todo, default_estimate=0):
+def distribute_projects(all_tasks, default_estimate=0, filter_zero=True):
 
-    task_distribution = group_projects(todo.tasks)
+    task_distribution = group_projects(all_tasks)
 
     spent_distribution = {key:0 for key in task_distribution}
     estimate_distribution = {key:0 for key in task_distribution}
@@ -210,9 +249,10 @@ def distribute_projects(todo, default_estimate=0):
             except:
                 pass
 
-    spent_distribution = {key:item for key, item in spent_distribution.items() if item > 0}
-    estimate_distribution = {key:item for key, item in estimate_distribution.items() if item > 0}
-    num_distribution = {key:item for key, item in num_distribution.items() if item > 0}
+    if filter_zero:
+        spent_distribution = {key:item for key, item in spent_distribution.items() if item > 0}
+        estimate_distribution = {key:item for key, item in estimate_distribution.items() if item > 0}
+        num_distribution = {key:item for key, item in num_distribution.items() if item > 0}
 
     return spent_distribution, estimate_distribution, num_distribution
 
