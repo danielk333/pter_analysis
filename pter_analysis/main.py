@@ -19,7 +19,7 @@ from pter.searcher import Searcher
 from .config import get_config, CONFIGFILE
 from . import analysis
 
-def escape(x):
+def unescape(x):
     x = x.replace('_',' ')
     return x
 
@@ -90,32 +90,33 @@ def projects(search, config, default_estimate, show_all, todotxt):
 
     fig, ax = plt.subplots()
     ax.set_title('Total time spent per project')
-    ax.bar([escape(x) for x in spent], [spent[x] for x in spent])
+    ax.bar([unescape(x) for x in spent], [spent[x] for x in spent])
     ax.set_ylabel('Time [h]')
-    ax.set_xticklabels([escape(x) for x in spent], rotation=rot)
+    ax.set_xticklabels([unescape(x) for x in spent], rotation=rot)
     pos = ax.get_position()
     pos.y0 += dy
     ax.set_position(pos)
 
     fig, ax = plt.subplots()
     ax.set_title('Total estimated time left per project')
-    ax.bar([escape(x) for x in est], [est[x] for x in est])
+    ax.bar([unescape(x) for x in est], [est[x] for x in est])
     ax.set_ylabel('Time [h]')
-    ax.set_xticklabels([escape(x) for x in est], rotation=rot)
+    ax.set_xticklabels([unescape(x) for x in est], rotation=rot)
     pos = ax.get_position()
     pos.y0 += dy
     ax.set_position(pos)
 
     fig, ax = plt.subplots()
     ax.set_title('Tasks left per project')
-    ax.bar([escape(x) for x in num], [num[x] for x in num])
+    ax.bar([unescape(x) for x in num], [num[x] for x in num])
     ax.set_ylabel('Frequency')
-    ax.set_xticklabels([escape(x) for x in num], rotation=rot)
+    ax.set_xticklabels([unescape(x) for x in num], rotation=rot)
     pos = ax.get_position()
     pos.y0 += dy
     ax.set_position(pos)
 
     plt.show()
+
 
 
 
@@ -179,7 +180,7 @@ def completion(config, default_estimate, todotxt, projects, search):
             ax.boxplot(proj_compl)
 
             xtics = list(task_distribution.keys())
-            xtics = [escape(x) for x in xtics]
+            xtics = [unescape(x) for x in xtics]
             ax.set_xticklabels(xtics, rotation=45)
             
             ax.set_ylabel('Completion time [d]')
@@ -213,6 +214,15 @@ def delay(config, projects, show_all, todotxt, search):
 
     cfg, todo = prepare(todotxt, config)
 
+    fig, ax = plt.subplots()
+
+    ax = plot_delays(ax, cfg, projects, show_all, todo, search)
+
+    plt.show()
+
+
+def plot_delays(ax, cfg, projects, show_all, todo, search):
+
     for sch in search:
         tasks = apply_serach(cfg, todo, sch)
 
@@ -223,7 +233,7 @@ def delay(config, projects, show_all, todotxt, search):
                 proj_compl.append(analysis.get_delays(task_distribution[proj]))
 
             xtics = list(task_distribution.keys())
-            xtics = [escape(x) for x in xtics]
+            xtics = [unescape(x) for x in xtics]
 
             if show_all:
                 xtics = [x for ind, x in enumerate(xtics)]
@@ -232,7 +242,6 @@ def delay(config, projects, show_all, todotxt, search):
                 xtics = [x for ind, x in enumerate(xtics) if len(proj_compl[ind]) > 0]
                 proj_compl = [x for x in proj_compl if len(x) > 0]
 
-            fig, ax = plt.subplots()
             ax.set_title(f'{sch}: Task delay time distribution')
             ax.boxplot(proj_compl)
 
@@ -246,13 +255,12 @@ def delay(config, projects, show_all, todotxt, search):
 
         else:
             delays = analysis.get_delays(tasks)
-            fig, ax = plt.subplots()
             ax.set_title(f'{sch}: Task delay time distribution')
             ax.hist(delays)
             ax.set_xlabel('Delay time [d]')
             ax.set_ylabel('Frequency')
 
-    plt.show()
+    return ax
 
 
 
@@ -400,21 +408,29 @@ def burndown(config, default_estimate, default_delay, todotxt, end, search, adap
     SEARCH: Pter-type search strings (multiple searches are given by space separation)
     '''
 
+    cfg, todo = prepare(todotxt, config)
+
+    fig, ax = plt.subplots(1, 1, constrained_layout=True, figsize=(9, 4))
+
+    ax = burndown_plot(ax, cfg, default_estimate, default_delay, todo, end, search, adaptive)
+
+    plt.show()
+
+
+def burndown_plot(ax, cfg, default_estimate, default_delay, todo, end, search, adaptive):
+
     if len(end) > 0:
         end_date = datetime.date.fromisoformat(end)
     else:
         end_date = None
 
-    cfg, todo = prepare(todotxt, config)
     
     nominal_day = parse_duration(cfg.get('General','work-day-length'))
     nominal_week = parse_duration(cfg.get('General','work-week-length'))
 
     h_per_day = nominal_week.days*(nominal_day.seconds/3600.0)/5.0
-
-
-    fig, ax = plt.subplots(1, 1, constrained_layout=True, figsize=(9, 4))
-    locator = mdates.AutoDateLocator(minticks=3, maxticks=7)
+    
+    locator = mdates.AutoDateLocator(minticks=5, maxticks=15)
     formatter = mdates.ConciseDateFormatter(locator)
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(formatter)
@@ -461,7 +477,63 @@ def burndown(config, default_estimate, default_delay, todotxt, end, search, adap
     ax.set_xlim([datetime.datetime.today(),end_date])
     ax.legend()
 
+    return ax
+
+
+
+@cli.command()
+@click.argument('SEARCH', nargs=-1)
+@click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--end', default='', type=str, help='End date for burndown chart (ISO format)')
+@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
+@click.option('--default-delay', default=5, type=int, help='If "due" date and "t" tag is already passed, assume this many days delay')
+@click.option('--adaptive', is_flag=True, help='Use adaptive work distribution algorithm trying to keep 100% activity')
+def quicklook(config, default_estimate, default_delay, todotxt, end, search, adaptive):
+    '''Quicklook panel combining burndown, project time left distribution and delay distributions.
+    '''
+
+    cfg, todo = prepare(todotxt, config)
+
+    fig = plt.figure(figsize=(12, 9))
+
+    ax = fig.add_subplot(2, 1, 1)
+    ax = burndown_plot(ax, cfg, default_estimate, default_delay, todo, end, search[1:], adaptive)
+
+    show_all = True
+    projects = True
+
+    ax2 = fig.add_subplot(2, 2, 3)
+    ax2 = plot_project_time_left(ax2, search[0], cfg, default_estimate, show_all, todo)
+
+    show_all = False
+
+    ax3 = fig.add_subplot(2, 2, 4)
+    ax3 = plot_delays(ax3, cfg, projects, show_all, todo, [search[0]])
+
+    plt.subplots_adjust(bottom=0.1, hspace=0.2, top=0.95)
+
     plt.show()
+
+
+def plot_project_time_left(ax, search, cfg, default_estimate, show_all, todo):
+
+    tasks = apply_serach(cfg, todo, search)
+
+    dy = 0.1
+    rot = 70
+
+    spent, est, num = analysis.distribute_projects(tasks, default_estimate=default_estimate, filter_zero=not show_all)
+
+    ax.set_title('Total estimated time left per project')
+    ax.bar([unescape(x) for x in est], [est[x] for x in est])
+    ax.set_ylabel('Time [h]')
+    ax.set_xticklabels([unescape(x) for x in est], rotation=rot)
+    pos = ax.get_position()
+    pos.y0 += dy
+    ax.set_position(pos)
+
+    return ax
 
 
 @cli.command()

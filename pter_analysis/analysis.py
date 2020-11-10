@@ -60,7 +60,7 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
             else:
                 duration.append(default_estimate)
 
-        start.append(task.creation_date)
+        start.append(today)
         if 't' in task.attributes:
             due = task.attributes['t'][0].strip()
         else:
