@@ -1,5 +1,5 @@
 import setuptools
-__version__ = '0.0.1'
+__version__ = '0.3.0'
 
 with open('README.rst', 'r') as fh:
     long_description = fh.read()
