@@ -157,8 +157,7 @@ def ages(config, default_estimate, todotxt, search):
 @click.option('--projects', is_flag=True, help='Divide the distribution into projects')
 @click.option('--config', default=CONFIGFILE, help='Path to config file')
 @click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
-@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
-def completion(config, default_estimate, todotxt, projects, search):
+def completion(config, todotxt, projects, search):
     '''Plots the distribution of task time to completion.
 
         SEARCH: Pter-type search strings (multiple searches are given by space separation)
@@ -173,7 +172,7 @@ def completion(config, default_estimate, todotxt, projects, search):
             task_distribution = analysis.group_projects(tasks)
             proj_compl = []
             for proj in task_distribution:
-                proj_compl.append(analysis.get_ages(task_distribution[proj]))
+                proj_compl.append(analysis.get_completion_time(task_distribution[proj]))
 
             fig, ax = plt.subplots()
             ax.set_title(f'{sch}: Task completion time distribution')
@@ -190,7 +189,7 @@ def completion(config, default_estimate, todotxt, projects, search):
             ax.set_position(pos)
 
         else:
-            compl = analysis.get_ages(tasks)
+            compl = analysis.get_completion_time(tasks)
             fig, ax = plt.subplots()
             ax.set_title(f'{sch}: Task completion time distribution')
             ax.hist(compl)
@@ -198,6 +197,55 @@ def completion(config, default_estimate, todotxt, projects, search):
             ax.set_ylabel('Frequency')
 
     plt.show()
+
+
+
+@distribution.command()
+@click.argument('SEARCH', nargs=-1)
+@click.option('--projects', is_flag=True, help='Divide the distribution into projects')
+@click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+def target(config, todotxt, projects, search):
+    '''Plots the distribution of task completion relative target due date.
+
+        SEARCH: Pter-type search strings (multiple searches are given by space separation)
+    '''
+
+    cfg, todo = prepare(todotxt, config)
+
+    for sch in search:
+        tasks = apply_serach(cfg, todo, sch)
+
+        if projects:
+            task_distribution = analysis.group_projects(tasks)
+            proj_compl = []
+            for proj in task_distribution:
+                proj_compl.append(analysis.get_target(task_distribution[proj]))
+
+            fig, ax = plt.subplots()
+            ax.set_title(f'{sch}: Task completion date relative target date')
+            ax.boxplot(proj_compl)
+
+            xtics = list(task_distribution.keys())
+            xtics = [unescape(x) for x in xtics]
+            ax.set_xticklabels(xtics, rotation=45)
+            
+            ax.set_ylabel('After due $\\leftarrow$ Completed [d] $\\rightarrow$ Before due')
+            
+            pos = ax.get_position()
+            pos.y0 += 0.1
+            ax.set_position(pos)
+
+        else:
+            compl = analysis.get_target(tasks)
+            fig, ax = plt.subplots()
+            ax.set_title(f'{sch}: Task completion date relative target date')
+            ax.hist(compl)
+            ax.set_xlabel('After due $\\leftarrow$ Completed [d] $\\rightarrow$ Before due')
+            ax.set_ylabel('Frequency')
+
+    plt.show()
+
 
 
 @distribution.command()
@@ -293,6 +341,44 @@ def accuracy(config, default_estimate, todotxt, search):
     ax.set_position(pos)
 
     plt.show()
+
+
+
+
+@cli.command()
+@click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--show-all', is_flag=True, help='Show all projects')
+@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
+def next_week(config, default_estimate, todotxt, show_all):
+    '''Checks the prediction accuracy for the searches.
+    '''
+
+    search = 't:+1w duebefore:+1w -@delegate'
+
+    cfg, todo = prepare(todotxt, config)
+
+    tasks = apply_serach(cfg, todo, search)
+
+    dy = 0.1
+    rot = 70
+
+    spent, est, num = analysis.distribute_projects(tasks, default_estimate=default_estimate, filter_zero=not show_all)
+
+    fig, ax = plt.subplots()
+    ax.set_title('Total estimated work-time next week')
+    ax.bar([unescape(x) for x in est] + ['Total'], [est[x] for x in est] + [np.sum(est[x] for x in est)] )
+    ax.set_ylabel('Time [h]')
+    ax.set_xticklabels([unescape(x) for x in est] + ['[Total]'], rotation=rot)
+    pos = ax.get_position()
+    pos.y0 += dy
+    ax.set_position(pos)
+
+    ax.axhline(y=40.0, color='r')
+    ax.axhline(y=30.0, color='g')
+
+    plt.show()
+
 
 
 

@@ -210,7 +210,7 @@ def get_delays(tasks):
     return delays
 
 
-def get_ages(tasks):
+def get_completion_time(tasks):
     ages = []
     for task in tasks:
         if task.creation_date is None or not task.is_completed:
@@ -218,6 +218,27 @@ def get_ages(tasks):
         dt = task.completion_date - task.creation_date
         ages.append(dt.days)
     return ages
+
+
+def get_target(tasks):
+    targets = []
+    for task in tasks:
+        if not task.is_completed:
+            continue
+        if 'due' not in task.attributes and 't' not in task.attributes:
+            continue
+
+        if 't' in task.attributes:
+            due = task.attributes['t'][0].strip()
+        else:
+            due = task.attributes['due'][0].strip()
+
+        due = due.replace(',','')
+        due = datetime.date.fromisoformat(due)
+
+        dt = due - task.completion_date
+        targets.append(dt.days)
+    return targets
 
 
 def distribute_projects(all_tasks, default_estimate=0, filter_zero=True):
@@ -235,6 +256,13 @@ def distribute_projects(all_tasks, default_estimate=0, filter_zero=True):
             try:
                 if 'estimate' in task.attributes and not task.is_completed:
                     td_est = parse_duration(task.attributes['estimate'][0])
+
+                    if 'spent' in task.attributes:
+                        sp_est = parse_duration(task.attributes['spent'][0].replace('min','m'))
+                        td_est -= sp_est
+                        if td_est < timedelta(seconds=0):
+                            td_est = timedelta(seconds=0)
+
                     estimate_distribution[key] += td_est.seconds/3600.0
                 else:
                     if default_estimate != 0:
