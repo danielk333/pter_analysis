@@ -213,6 +213,15 @@ def target(config, todotxt, projects, search):
 
     cfg, todo = prepare(todotxt, config)
 
+    fig, ax = plt.subplots()
+
+    ax = plot_target(ax, cfg, todo, projects, search)
+
+    plt.show()
+
+
+def plot_target(ax, cfg, todo, projects, search, title_add_search=True):
+
     for sch in search:
         tasks = apply_serach(cfg, todo, sch)
 
@@ -221,9 +230,11 @@ def target(config, todotxt, projects, search):
             proj_compl = []
             for proj in task_distribution:
                 proj_compl.append(analysis.get_target(task_distribution[proj]))
-
-            fig, ax = plt.subplots()
-            ax.set_title(f'{sch}: Task completion date relative target date')
+            
+            if title_add_search:
+                ax.set_title(f'{sch}: Task completion date relative target date')
+            else:
+                ax.set_title('Relative task completion date')
             ax.boxplot(proj_compl)
 
             xtics = list(task_distribution.keys())
@@ -238,13 +249,15 @@ def target(config, todotxt, projects, search):
 
         else:
             compl = analysis.get_target(tasks)
-            fig, ax = plt.subplots()
-            ax.set_title(f'{sch}: Task completion date relative target date')
+            if title_add_search:
+                ax.set_title(f'{sch}: Task completion date relative target date')
+            else:
+                ax.set_title('Relative task completion date')
             ax.hist(compl)
             ax.set_xlabel('After due $\\leftarrow$ Completed [d] $\\rightarrow$ Before due')
             ax.set_ylabel('Frequency')
 
-    plt.show()
+    return ax
 
 
 
@@ -269,7 +282,7 @@ def delay(config, projects, show_all, todotxt, search):
     plt.show()
 
 
-def plot_delays(ax, cfg, projects, show_all, todo, search):
+def plot_delays(ax, cfg, projects, show_all, todo, search, title_add_search=True):
 
     for sch in search:
         tasks = apply_serach(cfg, todo, sch)
@@ -290,7 +303,10 @@ def plot_delays(ax, cfg, projects, show_all, todo, search):
                 xtics = [x for ind, x in enumerate(xtics) if len(proj_compl[ind]) > 0]
                 proj_compl = [x for x in proj_compl if len(x) > 0]
 
-            ax.set_title(f'{sch}: Task delay time distribution')
+            if title_add_search:
+                ax.set_title(f'{sch}: Task delay time distribution')
+            else:
+                ax.set_title('Task delay time')
             ax.boxplot(proj_compl)
 
             ax.set_xticklabels(xtics, rotation=45)
@@ -303,7 +319,10 @@ def plot_delays(ax, cfg, projects, show_all, todo, search):
 
         else:
             delays = analysis.get_delays(tasks)
-            ax.set_title(f'{sch}: Task delay time distribution')
+            if title_add_search:
+                ax.set_title(f'{sch}: Task delay time distribution')
+            else:
+                ax.set_title('Task delay time')
             ax.hist(delays)
             ax.set_xlabel('Delay time [d]')
             ax.set_ylabel('Frequency')
@@ -581,21 +600,24 @@ def quicklook(config, default_estimate, default_delay, todotxt, end, search, ada
 
     cfg, todo = prepare(todotxt, config)
 
-    fig = plt.figure(figsize=(12, 9))
+    fig = plt.figure(figsize=(18, 7))
 
     ax = fig.add_subplot(2, 1, 1)
     ax = burndown_plot(ax, cfg, default_estimate, default_delay, todo, end, search[1:], adaptive)
 
-    show_all = True
+    show_all = False
     projects = True
 
-    ax2 = fig.add_subplot(2, 2, 3)
+    ax2 = fig.add_subplot(2, 3, 4)
     ax2 = plot_project_time_left(ax2, search[0], cfg, default_estimate, show_all, todo)
 
-    show_all = False
 
-    ax3 = fig.add_subplot(2, 2, 4)
-    ax3 = plot_delays(ax3, cfg, projects, show_all, todo, [search[0]])
+    ax3 = fig.add_subplot(2, 3, 5)
+    ax3 = plot_delays(ax3, cfg, projects, show_all, todo, [search[0]], title_add_search = False)
+
+
+    ax4 = fig.add_subplot(2, 3, 6)
+    ax4 = plot_target(ax4, cfg, todo, projects, [search[0]], title_add_search = False)
 
     plt.subplots_adjust(bottom=0.1, hspace=0.2, top=0.95)
 
