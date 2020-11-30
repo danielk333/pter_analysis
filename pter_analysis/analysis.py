@@ -21,6 +21,7 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
         return ok
 
     today = datetime.date.today()
+    today_np = np.array([today])
 
     #create a master task list, remember origin
     tasks = []
@@ -53,7 +54,7 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
             else:
                 td = parse_duration(task.attributes['estimate'][0])
 
-            duration.append(td.seconds/3600.0)
+            duration.append(td.total_seconds()/3600.0)
         else:
             if default_estimate == 0:
                 continue
@@ -76,8 +77,8 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
     list_index = list_index[list_keep]
 
     duration = np.array(duration) 
-    start = np.array(start)
-    end = np.array(end)
+    start = np.array(list(np.datetime64(x) for x in start))
+    end = np.array(list(np.datetime64(x) for x in end))
 
     work_time = np.empty(duration.shape)
 
@@ -89,14 +90,14 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
     activity = duration/work_time
 
     if end_date is not None:
-        dates = np.arange(today, end_date)
+        dates = np.arange(today_np[0], end_date)
     else:
-        dates = np.arange(today, end.max())
+        dates = np.arange(today_np[0], end.max())
 
     total_activity = np.empty(dates.shape)
     sub_activites = [np.empty(dates.shape) for tind in tlst_inds]
     mod_start = start.copy()
-    mod_start[mod_start < today] = today
+    mod_start[mod_start < today] = today_np[0]
     mod_activity = activity.copy()
     for ind, date in enumerate(dates):
 
@@ -120,7 +121,7 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
                 mv = select_inds[0]
                 mod_start[mv] = start[mv]
                 if mod_start[mv] < today:
-                    mod_start[mv] = today
+                    mod_start[mv] = today_np[0]
                 break_at_end = True
 
             else:
@@ -133,7 +134,7 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
                     for mmv in select_inds.flatten():
                         mod_start[mmv] = start[mmv]
                         if mod_start[mmv] < today:
-                            mod_start[mmv] = today
+                            mod_start[mmv] = today_np[0]
                     
                         #re-calculate activity for that task
                         work_time[mmv] = np.busday_count(mod_start[mmv], end[mmv])*h_per_day
@@ -146,7 +147,7 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
                     #if we cannot push even that, just reset to original start and move on
                     mod_start[mv] = start[mv]
                     if mod_start[mv] < today:
-                        mod_start[mv] = today
+                        mod_start[mv] = today_np[0]
                     break_at_end = True
                 else:
                     #push task forward
@@ -254,26 +255,27 @@ def distribute_projects(all_tasks, default_estimate=0, filter_zero=True):
                 num_distribution[key] += 1
 
             try:
-                if 'estimate' in task.attributes and not task.is_completed:
-                    td_est = parse_duration(task.attributes['estimate'][0])
+                if not task.is_completed:
+                    if 'estimate' in task.attributes:
+                        td_est = parse_duration(task.attributes['estimate'][0])
 
-                    if 'spent' in task.attributes:
-                        sp_est = parse_duration(task.attributes['spent'][0].replace('min','m'))
-                        td_est -= sp_est
-                        if td_est < timedelta(seconds=0):
-                            td_est = timedelta(seconds=0)
+                        if 'spent' in task.attributes:
+                            sp_est = parse_duration(task.attributes['spent'][0].replace('min','m'))
+                            td_est -= sp_est
+                            if td_est < timedelta(seconds=0):
+                                td_est = timedelta(seconds=0)
 
-                    estimate_distribution[key] += td_est.seconds/3600.0
-                else:
-                    if default_estimate != 0:
-                        estimate_distribution[key] += default_estimate
+                        estimate_distribution[key] += td_est.total_seconds()/3600.0
+                    else:
+                        if default_estimate != 0:
+                            estimate_distribution[key] += default_estimate
             except:
                 pass
 
             try:
                 if 'spent' in task.attributes:
                     td_est = parse_duration(task.attributes['spent'][0].replace('min','m'))
-                    spent_distribution[key] += td_est.seconds/3600.0
+                    spent_distribution[key] += td_est.total_seconds()/3600.0
             except:
                 pass
 
@@ -306,12 +308,12 @@ def calculate_error(tasks, default_estimate=0):
         try:
             if 'estimate' in task.attributes:
                 td_est = parse_duration(task.attributes['estimate'][0])
-                est = td_est.seconds/3600.0
+                est = td_est.total_seconds()/3600.0
             else:
                 est = default_estimate
 
             td_meas = parse_duration(task.attributes['spent'][0])
-            meas = td_meas.seconds/3600.0
+            meas = td_meas.total_seconds()/3600.0
             error[ti] = meas - est
         except:
             error[ti] = np.nan
