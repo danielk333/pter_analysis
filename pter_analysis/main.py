@@ -19,6 +19,12 @@ from pter.searcher import Searcher
 from .config import get_config, CONFIGFILE
 from . import analysis
 
+
+cfg_help = f'Path to config file, defaults to "{str(CONFIGFILE)}".'
+todo_help = 'Path to the todotxt file to analyse, if not given, use the one in the configuration file.'
+default_est_help = 'If no "estimate" tag is given, assume this many hours (else exclude those tasks).'
+
+
 def unescape(x):
     x = x.replace('_',' ')
     return x
@@ -55,7 +61,7 @@ def apply_serach(cfg, todo, search):
 
 
 @click.group()
-@click.version_option()
+@click.version_option(version='1.0.0')
 def cli():
     pass
 
@@ -70,10 +76,10 @@ def distribution():
 
 @distribution.command()
 @click.argument('SEARCH', type=str)
-@click.option('--config', default=CONFIGFILE, help='Path to config file')
-@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--config', default=CONFIGFILE, help=cfg_help)
+@click.option('--todotxt', default='', type=str, help=todo_help)
+@click.option('--default-estimate', default=0, type=float, help=default_est_help)
 @click.option('--show-all', is_flag=True, help='Show all projects')
-@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
 def projects(search, config, default_estimate, show_all, todotxt):
     '''Plots the distribution of spent time, estimated time and task frequency over projects.
     '''
@@ -122,13 +128,13 @@ def projects(search, config, default_estimate, show_all, todotxt):
 
 @distribution.command()
 @click.argument('SEARCH', nargs=-1)
-@click.option('--config', default=CONFIGFILE, help='Path to config file')
-@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
-@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
+@click.option('--config', default=CONFIGFILE, help=cfg_help)
+@click.option('--todotxt', default='', type=str, help=todo_help)
+@click.option('--default-estimate', default=0, type=float, help=default_est_help)
 def ages(config, default_estimate, todotxt, search):
     '''Plots the distribution of task age.
 
-        SEARCH: Pter-type search strings (multiple searches are given by space separation)
+        [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
     '''
 
     cfg, todo = prepare(todotxt, config)
@@ -155,12 +161,12 @@ def ages(config, default_estimate, todotxt, search):
 @distribution.command()
 @click.argument('SEARCH', nargs=-1)
 @click.option('--projects', is_flag=True, help='Divide the distribution into projects')
-@click.option('--config', default=CONFIGFILE, help='Path to config file')
-@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--config', default=CONFIGFILE, help=cfg_help)
+@click.option('--todotxt', default='', type=str, help=todo_help)
 def completion(config, todotxt, projects, search):
     '''Plots the distribution of task time to completion.
 
-        SEARCH: Pter-type search strings (multiple searches are given by space separation)
+        [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
     '''
 
     cfg, todo = prepare(todotxt, config)
@@ -203,12 +209,12 @@ def completion(config, todotxt, projects, search):
 @distribution.command()
 @click.argument('SEARCH', nargs=-1)
 @click.option('--projects', is_flag=True, help='Divide the distribution into projects')
-@click.option('--config', default=CONFIGFILE, help='Path to config file')
-@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--config', default=CONFIGFILE, help=cfg_help)
+@click.option('--todotxt', default='', type=str, help=todo_help)
 def target(config, todotxt, projects, search):
     '''Plots the distribution of task completion relative target due date.
 
-        SEARCH: Pter-type search strings (multiple searches are given by space separation)
+        [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
     '''
 
     cfg, todo = prepare(todotxt, config)
@@ -221,6 +227,14 @@ def target(config, todotxt, projects, search):
 
 
 def plot_target(ax, cfg, todo, projects, search, title_add_search=True):
+
+    if cfg.getboolean('General', 'usetex'):
+        larr = '$\\leftarrow$'
+        rarr = '$\\rightarrow$'
+    else:
+        larr = '<-'
+        rarr = '->'
+
 
     for sch in search:
         tasks = apply_serach(cfg, todo, sch)
@@ -241,7 +255,7 @@ def plot_target(ax, cfg, todo, projects, search, title_add_search=True):
             xtics = [unescape(x) for x in xtics]
             ax.set_xticklabels(xtics, rotation=45)
             
-            ax.set_ylabel('After due $\\leftarrow$ Completed [d] $\\rightarrow$ Before due')
+            ax.set_ylabel(f'After due {larr} Completed [d] {rarr} Before due')
             
             pos = ax.get_position()
             pos.y0 += 0.1
@@ -254,7 +268,7 @@ def plot_target(ax, cfg, todo, projects, search, title_add_search=True):
             else:
                 ax.set_title('Relative task completion date')
             ax.hist(compl)
-            ax.set_xlabel('After due $\\leftarrow$ Completed [d] $\\rightarrow$ Before due')
+            ax.set_xlabel(f'After due {larr} Completed [d] {rarr} Before due')
             ax.set_ylabel('Frequency')
 
     return ax
@@ -263,14 +277,14 @@ def plot_target(ax, cfg, todo, projects, search, title_add_search=True):
 
 @distribution.command()
 @click.argument('SEARCH', nargs=-1)
-@click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--config', default=CONFIGFILE, help=cfg_help)
+@click.option('--todotxt', default='', type=str, help=todo_help)
 @click.option('--projects', is_flag=True, help='Divide the distribution into projects')
 @click.option('--show-all', is_flag=True, help='Show all projects')
-@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
 def delay(config, projects, show_all, todotxt, search):
     '''Plots the distribution of task delays.
 
-        SEARCH: Pter-type search strings (multiple searches are given by space separation)
+        [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
     '''
 
     cfg, todo = prepare(todotxt, config)
@@ -329,20 +343,26 @@ def plot_delays(ax, cfg, projects, show_all, todo, search, title_add_search=True
 
     return ax
 
-
-
 @cli.command()
 @click.argument('SEARCH', nargs=-1)
-@click.option('--config', default=CONFIGFILE, help='Path to config file')
-@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
-@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
+@click.option('--config', default=CONFIGFILE, help=cfg_help)
+@click.option('--todotxt', default='', type=str, help=todo_help)
+@click.option('--default-estimate', default=0, type=float, help=default_est_help)
 def accuracy(config, default_estimate, todotxt, search):
-    '''Checks the prediction accuracy for the searches.
+    '''Checks the prediction accuracy for the input search(es).
 
-    SEARCH: Pter-type search strings (multiple searches are given by space separation)
+    [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
     '''
 
     cfg, todo = prepare(todotxt, config)
+
+    if cfg.getboolean('General', 'usetex'):
+        larr = '$\\leftarrow$'
+        rarr = '$\\rightarrow$'
+    else:
+        larr = '<-'
+        rarr = '->'
+
     errors = []
     for sch in search:
         tasks = apply_serach(cfg, todo, sch)
@@ -353,7 +373,7 @@ def accuracy(config, default_estimate, todotxt, search):
     ax.set_title('Execution time estimate errors')
     ax.boxplot(errors)
     ax.set_xticklabels(search, rotation=45)
-    ax.set_ylabel('Overestimate $\\leftarrow$ [h] $\\rightarrow$ Underestimate')
+    ax.set_ylabel(f'Overestimate {larr} [h] {rarr} Underestimate')
     
     pos = ax.get_position()
     pos.y0 += 0.24
@@ -365,10 +385,10 @@ def accuracy(config, default_estimate, todotxt, search):
 
 
 @cli.command()
-@click.option('--config', default=CONFIGFILE, help='Path to config file')
-@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--config', default=CONFIGFILE, help=cfg_help)
+@click.option('--todotxt', default='', type=str, help=todo_help)
+@click.option('--default-estimate', default=0, type=float, help=default_est_help)
 @click.option('--show-all', is_flag=True, help='Show all projects')
-@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
 def next_week(config, default_estimate, todotxt, show_all):
     '''Checks the prediction accuracy for the searches.
     '''
@@ -403,15 +423,15 @@ def next_week(config, default_estimate, todotxt, show_all):
 
 @cli.command()
 @click.argument('SEARCH', nargs=-1)
-@click.option('--config', default=CONFIGFILE, help='Path to config file')
-@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--config', default=CONFIGFILE, help=cfg_help)
+@click.option('--todotxt', default='', type=str, help=todo_help)
 @click.option('--start', default='', type=str, help='Starting date in ISO format')
 @click.option('--end', default='', type=str, help='Ending date in ISO format')
 @click.option('--out', default='rst', type=str, help='Output format, can be [rst|html|txt]')
 def done(config, start, end, out, todotxt, search):
     '''Prints completion lists.
 
-    SEARCH: Pter-type search strings (multiple searches are given by space separation)
+    [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
     '''
 
 
@@ -440,7 +460,7 @@ def done(config, start, end, out, todotxt, search):
     if out == 'rst':
 
         def add_row(text):
-            return '- ' + text
+            return '- ' + text + '\n'
 
         def add_header(text, first):
             out_text = ''
@@ -466,6 +486,18 @@ def done(config, start, end, out, todotxt, search):
             out_text += '<ul>\n'
             return out_text
 
+    elif out == 'txt':
+
+        def add_row(text):
+            return text + '\n'
+
+        def add_header(text, first):
+            out_text = ''
+            if not first:
+                out_text += '\n'
+            out_text += str(text) + '\n'
+            out_text += '\n'
+            return out_text
     else:
         raise NotImplementedError('Sorry not implemented yet')
 
@@ -493,6 +525,8 @@ def done(config, start, end, out, todotxt, search):
         pass
     elif out == 'html':
         out_text += '</ul></body></html>'
+    elif out == 'txt':
+        pass
 
 
     print(out_text)
@@ -501,16 +535,16 @@ def done(config, start, end, out, todotxt, search):
 
 @cli.command()
 @click.argument('SEARCH', nargs=-1)
-@click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--config', default=CONFIGFILE, help=cfg_help)
+@click.option('--todotxt', default='', type=str, help=todo_help)
+@click.option('--default-estimate', default=0, type=float, help=default_est_help)
 @click.option('--end', default='', type=str, help='End date for burndown chart (ISO format)')
-@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
-@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
-@click.option('--default-delay', default=5, type=int, help='If "due" date and "t" tag is already passed, assume this many days delay')
+@click.option('--default-delay', default=5, type=int, help='If "due" date and "t" date has already passed, assume this many days automatic delay')
 @click.option('--adaptive', is_flag=True, help='Use adaptive work distribution algorithm trying to keep 100% activity')
 def burndown(config, default_estimate, default_delay, todotxt, end, search, adaptive):
     '''Creates a burn-down chart for the selection.
 
-    SEARCH: Pter-type search strings (multiple searches are given by space separation)
+    [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
     '''
 
     cfg, todo = prepare(todotxt, config)
@@ -588,11 +622,11 @@ def burndown_plot(ax, cfg, default_estimate, default_delay, todo, end, search, a
 
 @cli.command()
 @click.argument('SEARCH', nargs=-1)
-@click.option('--config', default=CONFIGFILE, help='Path to config file')
+@click.option('--config', default=CONFIGFILE, help=cfg_help)
+@click.option('--todotxt', default='', type=str, help=todo_help)
+@click.option('--default-estimate', default=0, type=float, help=default_est_help)
 @click.option('--end', default='', type=str, help='End date for burndown chart (ISO format)')
-@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
-@click.option('--default-estimate', default=0, type=float, help='If no "estimate" tag is given, assume this many hours (else exclude those tasks)')
-@click.option('--default-delay', default=5, type=int, help='If "due" date and "t" tag is already passed, assume this many days delay')
+@click.option('--default-delay', default=5, type=int, help='If "due" date and "t" date has already passed, assume this many days automatic delay')
 @click.option('--adaptive', is_flag=True, help='Use adaptive work distribution algorithm trying to keep 100% activity')
 def quicklook(config, default_estimate, default_delay, todotxt, end, search, adaptive):
     '''Quicklook panel combining burndown, project time left distribution and delay distributions.
@@ -646,14 +680,14 @@ def plot_project_time_left(ax, search, cfg, default_estimate, show_all, todo):
 
 @cli.command()
 @click.argument('SEARCH', type=str)
-@click.option('--todotxt', default='', type=str, help='Path to the todotxt file to analyse')
+@click.option('--config', default=CONFIGFILE, help=cfg_help)
+@click.option('--todotxt', default='', type=str, help=todo_help)
 @click.option('--task-limit', default=1, type=int, help='Max number of tasks per unique date')
 @click.option('--name-limit', default=20, type=int, help='Max number of characters per task')
 @click.option('--context/--no-context', default=False, help='Remove project tags from task')
 @click.option('--project/--no-project', default=True, help='Remove context tags from task')
-@click.option('--config', default=str(CONFIGFILE), help='Path to config file')
 def timeline(config, project, context, name_limit, task_limit, todotxt, search):
-    '''Creates a timeline chart for the due dates of the selection.
+    '''Creates a time-line chart for the due dates of the selection (BETA FEATURE).
 
     SEARCH: Pter-type search string
     '''
