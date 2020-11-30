@@ -82,6 +82,8 @@ def distribution():
 @click.option('--show-all', is_flag=True, help='Show all projects')
 def projects(search, config, default_estimate, show_all, todotxt):
     '''Plots the distribution of spent time, estimated time and task frequency over projects.
+
+    SEARCH: A single pter-type search string.
     '''
 
 
@@ -131,8 +133,9 @@ def projects(search, config, default_estimate, show_all, todotxt):
 @click.option('--config', default=CONFIGFILE, help=cfg_help)
 @click.option('--todotxt', default='', type=str, help=todo_help)
 @click.option('--default-estimate', default=0, type=float, help=default_est_help)
-def ages(config, default_estimate, todotxt, search):
-    '''Plots the distribution of task age.
+@click.option('--projects', is_flag=True, help='Divide the distribution into projects')
+def ages(config, default_estimate, todotxt, projects, search):
+    '''Plots the distribution of time between task creation date and now, i.e task ages.
 
         [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
     '''
@@ -142,18 +145,46 @@ def ages(config, default_estimate, todotxt, search):
     for sch in search:
         tasks = apply_serach(cfg, todo, sch)
 
-        ages = []
-        for task in tasks:
-            if task.creation_date is None:
-                continue
-            dt = datetime.date.today() - task.creation_date
-            ages.append(dt.days)
+        if projects:
+            task_distribution = analysis.group_projects(tasks)
+            ages = []
+            for proj in task_distribution:
+                ages_ = []
+                for task in task_distribution[proj]:
+                    if task.creation_date is None:
+                        continue
+                    dt = datetime.date.today() - task.creation_date
+                    ages_.append(dt.days)
+                ages.append(ages_)
 
-        fig, ax = plt.subplots()
-        ax.set_title(f'{sch}: Task age distribution')
-        ax.hist(ages)
-        ax.set_xlabel('Age [d]')
-        ax.set_ylabel('Frequency')
+            fig, ax = plt.subplots()
+            ax.set_title(f'{sch} | Task age distribution')
+            ax.boxplot(ages)
+
+            xtics = list(task_distribution.keys())
+            xtics = [unescape(x) for x in xtics]
+            ax.set_xticklabels(xtics, rotation=45)
+            
+            ax.set_ylabel('Age [d]')
+            
+            pos = ax.get_position()
+            pos.y0 += 0.1
+            ax.set_position(pos)
+
+        else:
+
+            ages = []
+            for task in tasks:
+                if task.creation_date is None:
+                    continue
+                dt = datetime.date.today() - task.creation_date
+                ages.append(dt.days)
+
+            fig, ax = plt.subplots()
+            ax.set_title(f'{sch} | Task age distribution')
+            ax.hist(ages)
+            ax.set_xlabel('Age [d]')
+            ax.set_ylabel('Frequency')
 
     plt.show()
 
@@ -164,7 +195,7 @@ def ages(config, default_estimate, todotxt, search):
 @click.option('--config', default=CONFIGFILE, help=cfg_help)
 @click.option('--todotxt', default='', type=str, help=todo_help)
 def completion(config, todotxt, projects, search):
-    '''Plots the distribution of task time to completion.
+    '''Plots the distribution of time between task creation and task completion.
 
         [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
     '''
@@ -181,7 +212,7 @@ def completion(config, todotxt, projects, search):
                 proj_compl.append(analysis.get_completion_time(task_distribution[proj]))
 
             fig, ax = plt.subplots()
-            ax.set_title(f'{sch}: Task completion time distribution')
+            ax.set_title(f'{sch} | Task completion time distribution')
             ax.boxplot(proj_compl)
 
             xtics = list(task_distribution.keys())
@@ -197,7 +228,7 @@ def completion(config, todotxt, projects, search):
         else:
             compl = analysis.get_completion_time(tasks)
             fig, ax = plt.subplots()
-            ax.set_title(f'{sch}: Task completion time distribution')
+            ax.set_title(f'{sch} | Task completion time distribution')
             ax.hist(compl)
             ax.set_xlabel('Completion time [d]')
             ax.set_ylabel('Frequency')
@@ -213,7 +244,7 @@ def completion(config, todotxt, projects, search):
 @click.option('--todotxt', default='', type=str, help=todo_help)
 @click.option('--show-all', is_flag=True, help='Show all projects')
 def target(config, todotxt, projects, show_all, search):
-    '''Plots the distribution of task completion relative target due date.
+    '''Plots the distribution of task completion date relative target due date.
 
         [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
     '''
@@ -254,7 +285,7 @@ def plot_target(ax, cfg, todo, projects, show_all, search, title_add_search=True
 
             
             if title_add_search:
-                ax.set_title(f'{sch}: Task completion date relative target date')
+                ax.set_title(f'{sch} | Task completion date relative target date')
             else:
                 ax.set_title('Relative task completion date')
             ax.boxplot(proj_compl)
@@ -272,7 +303,7 @@ def plot_target(ax, cfg, todo, projects, show_all, search, title_add_search=True
         else:
             compl = analysis.get_target(tasks)
             if title_add_search:
-                ax.set_title(f'{sch}: Task completion date relative target date')
+                ax.set_title(f'{sch} | Task completion date relative target date')
             else:
                 ax.set_title('Relative task completion date')
             ax.hist(compl)
@@ -290,7 +321,7 @@ def plot_target(ax, cfg, todo, projects, show_all, search, title_add_search=True
 @click.option('--projects', is_flag=True, help='Divide the distribution into projects')
 @click.option('--show-all', is_flag=True, help='Show all projects')
 def delay(config, projects, show_all, todotxt, search):
-    '''Plots the distribution of task delays.
+    '''Plots the distribution of the "t:" tag relative the "due:" tag, i.e. task delays.
 
         [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
     '''
@@ -326,7 +357,7 @@ def plot_delays(ax, cfg, projects, show_all, todo, search, title_add_search=True
                 proj_compl = [x for x in proj_compl if len(x) > 0]
 
             if title_add_search:
-                ax.set_title(f'{sch}: Task delay time distribution')
+                ax.set_title(f'{sch} | Task delay time distribution')
             else:
                 ax.set_title('Task delay time')
             ax.boxplot(proj_compl)
@@ -342,7 +373,7 @@ def plot_delays(ax, cfg, projects, show_all, todo, search, title_add_search=True
         else:
             delays = analysis.get_delays(tasks)
             if title_add_search:
-                ax.set_title(f'{sch}: Task delay time distribution')
+                ax.set_title(f'{sch} | Task delay time distribution')
             else:
                 ax.set_title('Task delay time')
             ax.hist(delays)
@@ -647,7 +678,9 @@ def burndown_plot(ax, cfg, default_estimate, default_delay, todo, end, search, a
 @click.option('--default-delay', default=5, type=int, help='If "due" date and "t" date has already passed, assume this many days automatic delay')
 @click.option('--adaptive', is_flag=True, help='Use adaptive work distribution algorithm trying to keep 100% activity')
 def quicklook(config, default_estimate, default_delay, todotxt, end, search, adaptive):
-    '''Quicklook panel combining burndown, project time left distribution and delay distributions.
+    '''Quicklook panel combining burndown, project time left distribution, delay distributions and target completion date distributions.
+
+        [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
     '''
 
     cfg, todo = prepare(todotxt, config)
@@ -707,7 +740,7 @@ def plot_project_time_left(ax, search, cfg, default_estimate, show_all, todo):
 def timeline(config, project, context, name_limit, task_limit, todotxt, search):
     '''Creates a time-line chart for the due dates of the selection (BETA FEATURE).
 
-    SEARCH: Pter-type search string
+    SEARCH: A single pter-type search string.
     '''
     cfg, todo = prepare(todotxt, config)
     tasks = apply_serach(cfg, todo, search)
