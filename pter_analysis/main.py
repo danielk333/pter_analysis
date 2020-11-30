@@ -211,7 +211,8 @@ def completion(config, todotxt, projects, search):
 @click.option('--projects', is_flag=True, help='Divide the distribution into projects')
 @click.option('--config', default=CONFIGFILE, help=cfg_help)
 @click.option('--todotxt', default='', type=str, help=todo_help)
-def target(config, todotxt, projects, search):
+@click.option('--show-all', is_flag=True, help='Show all projects')
+def target(config, todotxt, projects, show_all, search):
     '''Plots the distribution of task completion relative target due date.
 
         [SEARCH]: Pter-type search string(s), multiple searches are given by space separation and surrounded by quotes. The standard GNU syntax of supplying -- before these searches is used.
@@ -221,12 +222,12 @@ def target(config, todotxt, projects, search):
 
     fig, ax = plt.subplots()
 
-    ax = plot_target(ax, cfg, todo, projects, search)
+    ax = plot_target(ax, cfg, todo, projects, show_all, search)
 
     plt.show()
 
 
-def plot_target(ax, cfg, todo, projects, search, title_add_search=True):
+def plot_target(ax, cfg, todo, projects, show_all, search, title_add_search=True):
 
     if cfg.getboolean('General', 'usetex'):
         larr = '$\\leftarrow$'
@@ -241,9 +242,16 @@ def plot_target(ax, cfg, todo, projects, search, title_add_search=True):
 
         if projects:
             task_distribution = analysis.group_projects(tasks)
+
             proj_compl = []
             for proj in task_distribution:
                 proj_compl.append(analysis.get_target(task_distribution[proj]))
+
+            if not show_all:
+                o_keys = list(task_distribution.keys())
+                task_distribution = {key:task_distribution[key] for i, key in enumerate(o_keys) if len(proj_compl[i]) > 0}
+                proj_compl = [proj_compl[i] for i in range(len(o_keys)) if len(proj_compl[i]) > 0]
+
             
             if title_add_search:
                 ax.set_title(f'{sch}: Task completion date relative target date')
@@ -661,7 +669,7 @@ def quicklook(config, default_estimate, default_delay, todotxt, end, search, ada
 
 
     ax4 = fig.add_subplot(2, 3, 6)
-    ax4 = plot_target(ax4, cfg, todo, projects, [search[0]], title_add_search = False)
+    ax4 = plot_target(ax4, cfg, todo, projects, show_all, [search[0]], title_add_search = False)
 
     plt.subplots_adjust(bottom=0.1, hspace=0.2, top=0.95)
 
