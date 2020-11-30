@@ -13,12 +13,21 @@ with open('requirements', 'r') as fh:
 setuptools.setup(
     name='pter_analysis',
     version=__version__,
-    long_description=long_description,
+    long_description='''
+``apter`` is a complementary analysis tool to the todotxt handler ``pter``. If certain tags are consequently used in tasks several statistics and distributions can be calculated using ``apter`` such as:
+
+* Estimated time left per project
+* Estimated workload for completing all tasks in ``pter`` search(es)
+* Task estimation accuracy
+* Task delay (usage of the ``t:`` tag) or task completion time (``completed`` before or after ``due:`` tag) distributions
+
+And much more...
+
+See the github README file for more information.
+    ''',
     url='https://github.com/danielk333/pter_analysis',
     classifiers=[
         'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: GNU-GPLv3',
-        'Operating System :: OS Independent',
     ],
     install_requires=pip_req,
     packages=setuptools.find_packages(),
