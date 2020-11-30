@@ -22,23 +22,23 @@ Below are a series of examples of the usage of `apter`. The main application is 
 
 ### Burndown chart
 
-Generated using `apter accuracy -- "@programming t:"`
+Generated using `apter burndown --end 2021-01-01 --adaptive -- "t: +e3dpc" "t: +dasst" "t: +mu"`. It shows the planned work percentage, using 6h work days (this is more realistic for actually completing tasks in a day since, e.g. meetings and reading emails are not tasks), for three different projects. It uses the entered `estimate`, `due` and `t` (taking `spent` tag into account) tags to calculate how much work needs to be done when. The `--adaptive` tag enables a algorithm that tries to shuffle around the start-time of tasks to keep the working activity below 100 percent.
 
 ![](doc/apter-demo-1.png)
 
 
 ### Estimation accuracy
 
-Generated using `apter accuracy -- "@programming t:"`
+Generated using `apter accuracy -- "t: @programming" "t: @admin"`. It shows the discrepancy between the `estimate` and `spent`. Here two different contexts are compared, showing that the estimation for programming tasks is zero centered while there is a clear bias to underestimate the time to complete administrative tasks.
 
-![](doc/apter-demo-1.png)
+![](doc/apter-demo-2.png)
 
 
 ### Time left
 
-Generated using `apter accuracy -- "@programming t:"`
+Generated using `apter distribution projects "t:"`. It shows the estimated time left for each project using the `estimate` tag.
 
-![](doc/apter-demo-1.png)
+![](doc/apter-demo-3.png)
 
 
 

@@ -57,6 +57,7 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
             duration.append(td.total_seconds()/3600.0)
         else:
             if default_estimate == 0:
+                list_keep[ti] = False
                 continue
             else:
                 duration.append(default_estimate)
