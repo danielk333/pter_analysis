@@ -385,17 +385,27 @@ def accuracy(config, default_estimate, todotxt, search):
 
 
 @cli.command()
+@click.argument('SEARCH', default='')
 @click.option('--config', default=CONFIGFILE, help=cfg_help)
 @click.option('--todotxt', default='', type=str, help=todo_help)
 @click.option('--default-estimate', default=0, type=float, help=default_est_help)
 @click.option('--show-all', is_flag=True, help='Show all projects')
-def next_week(config, default_estimate, todotxt, show_all):
-    '''Checks the prediction accuracy for the searches.
+def next_week(search, config, default_estimate, todotxt, show_all):
+    '''Shows the planned work that needs to be completed in the next 7 days distributed across projects, takes "spent" tag into account for non-completed tasks.
+
+    [SEARCH]: A single pter-type search string, surrounded by quotes. If no SEARCH given, uses 't:+1w duebefore:+1w -@delegate -@milestone'.
     '''
 
-    search = 't:+1w duebefore:+1w -@delegate'
+    if len(search) == 0:
+        search = 't:+1w duebefore:+1w -@delegate -@milestone'
 
     cfg, todo = prepare(todotxt, config)
+
+    nominal_day = parse_duration(cfg.get('General','work-day-length'))
+    nominal_week = parse_duration(cfg.get('General','work-week-length'))
+
+    w_h = nominal_week.days*(nominal_day.total_seconds()/3600.0)
+    w_h_ok = w_h*0.75
 
     tasks = apply_serach(cfg, todo, search)
 
@@ -413,8 +423,8 @@ def next_week(config, default_estimate, todotxt, show_all):
     pos.y0 += dy
     ax.set_position(pos)
 
-    ax.axhline(y=40.0, color='r')
-    ax.axhline(y=30.0, color='g')
+    ax.axhline(y=w_h, color='r')
+    ax.axhline(y=w_h_ok, color='g')
 
     plt.show()
 
@@ -567,7 +577,7 @@ def burndown_plot(ax, cfg, default_estimate, default_delay, todo, end, search, a
     nominal_day = parse_duration(cfg.get('General','work-day-length'))
     nominal_week = parse_duration(cfg.get('General','work-week-length'))
 
-    h_per_day = nominal_week.days*(nominal_day.seconds/3600.0)/5.0
+    h_per_day = nominal_week.days*(nominal_day.total_seconds()/3600.0)/5.0
     
     locator = mdates.AutoDateLocator(minticks=5, maxticks=15)
     formatter = mdates.ConciseDateFormatter(locator)

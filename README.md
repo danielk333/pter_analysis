@@ -18,20 +18,50 @@ And much more...
 
 ## Examples
 
+Below are a series of examples of the usage of `apter`. The main application is performance review and project planning. However, how to do performance review and project planning is not covered in this README, only examples of usage that can help in those activities.
 
-Example image 1
+### Burndown chart
 
-![](doc/apter-demo-1.png)
-
-
-Example image 2, generated using `apter accuracy -- "@programming t:"`
+Generated using `apter accuracy -- "@programming t:"`
 
 ![](doc/apter-demo-1.png)
 
 
-Example image 3
+### Estimation accuracy
+
+Generated using `apter accuracy -- "@programming t:"`
 
 ![](doc/apter-demo-1.png)
+
+
+### Time left
+
+Generated using `apter accuracy -- "@programming t:"`
+
+![](doc/apter-demo-1.png)
+
+
+
+### Generating completion list
+
+Generated using `apter done --start 2020-11-09 --end 2020-11-10 --out rst -- "t:"`
+
+```
+2020-11-09
+==========
+
+- @programming +mu run validate event search and analysis on the test data set estimate:4h due:2020-11-05 spent:4h12m
+- @programming +mu generalize "custom velocity" in pipeline estimate:2h due:2020-11-06 spent:3h4m
+- @programming +apter account for spent tag in burndown due:2020-11-05 estimate:1h spent:32m
+
+
+
+2020-11-10
+==========
+
+- @admin +course read papers for next physics seminar estimate:3h due:2020-11-11 spent:4h59m
+- @admin +course prepare presentation for next physics seminar estimate:8h due:2020-11-11 spent:6h42m
+```
 
 
 

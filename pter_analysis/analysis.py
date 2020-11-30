@@ -54,7 +54,7 @@ def calculate_total_activity(tasks_lists, h_per_day, default_estimate=0, default
             else:
                 td = parse_duration(task.attributes['estimate'][0])
 
-            duration.append(td.seconds/3600.0)
+            duration.append(td.total_seconds()/3600.0)
         else:
             if default_estimate == 0:
                 continue
@@ -265,7 +265,7 @@ def distribute_projects(all_tasks, default_estimate=0, filter_zero=True):
                             if td_est < timedelta(seconds=0):
                                 td_est = timedelta(seconds=0)
 
-                        estimate_distribution[key] += td_est.seconds/3600.0
+                        estimate_distribution[key] += td_est.total_seconds()/3600.0
                     else:
                         if default_estimate != 0:
                             estimate_distribution[key] += default_estimate
@@ -275,7 +275,7 @@ def distribute_projects(all_tasks, default_estimate=0, filter_zero=True):
             try:
                 if 'spent' in task.attributes:
                     td_est = parse_duration(task.attributes['spent'][0].replace('min','m'))
-                    spent_distribution[key] += td_est.seconds/3600.0
+                    spent_distribution[key] += td_est.total_seconds()/3600.0
             except:
                 pass
 
@@ -308,12 +308,12 @@ def calculate_error(tasks, default_estimate=0):
         try:
             if 'estimate' in task.attributes:
                 td_est = parse_duration(task.attributes['estimate'][0])
-                est = td_est.seconds/3600.0
+                est = td_est.total_seconds()/3600.0
             else:
                 est = default_estimate
 
             td_meas = parse_duration(task.attributes['spent'][0])
-            meas = td_meas.seconds/3600.0
+            meas = td_meas.total_seconds()/3600.0
             error[ti] = meas - est
         except:
             error[ti] = np.nan
